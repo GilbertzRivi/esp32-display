@@ -27,11 +27,11 @@
 #define TAG "main"
 
 /* ------------------------------------------------------------------ */
-/* Boot render task                                                     */
+/* Boot render task                                                    */
 /*                                                                     */
 /* Wywoluje lv_timer_handler() co ~16ms (ok. 60fps) przez caly czas   */
-/* fazy boot. Dzieki temu animacje (ticker, spinner) dzialaja rowniez  */
-/* gdy glowny task jest zablokowany przez wifi_connect/http_fetch.     */
+/* fazy boot. Dzieki temu animacje (ticker, spinner) dzialaja rowniez */
+/* gdy glowny task jest zablokowany przez wifi_connect/http_fetch.    */
 /* ------------------------------------------------------------------ */
 
 static volatile bool g_boot_done        = false;
@@ -51,7 +51,7 @@ static void boot_render_task(void *arg)
 }
 
 /* ------------------------------------------------------------------ */
-/* Loading screen                                                       */
+/* Loading screen                                                      */
 /* ------------------------------------------------------------------ */
 
 static struct {
@@ -62,98 +62,140 @@ static struct {
     lv_obj_t *progress_bar;
 } g_boot;
 
-/* Kolory hardcoded — theme nie jest jeszcze zaladowany z serwera */
-#define BOOT_BG     lv_color_hex(0x040c02)
-#define BOOT_FG     lv_color_hex(0x5fff35)
-#define BOOT_ACCENT lv_color_hex(0xa0ff50)
-#define BOOT_DIM    lv_color_hex(0x0c2006)
+#define BOOT_FONT (&lv_font_unscii_8)
 
-static lv_obj_t *boot_sep(lv_obj_t *parent, int y, lv_color_t col)
+#define BOOT_BG         lv_color_hex(0x0A0F14)
+#define BOOT_PANEL      lv_color_hex(0x10161D)
+#define BOOT_LINE       lv_color_hex(0x24303C)
+#define BOOT_TEXT       lv_color_hex(0xD8E1EA)
+#define BOOT_MUTED      lv_color_hex(0x8A98A8)
+#define BOOT_ACCENT     lv_color_hex(0x67B7FF)
+#define BOOT_ACCENT_DIM lv_color_hex(0x162332)
+#define BOOT_OK         lv_color_hex(0x7CD992)
+#define BOOT_OK_DIM     lv_color_hex(0x16241B)
+#define BOOT_BAR_BG     lv_color_hex(0x18212B)
+
+static lv_obj_t *boot_box(lv_obj_t *parent, int x, int y, int w, int h)
 {
     lv_obj_t *obj = lv_obj_create(parent);
     lv_obj_remove_style_all(obj);
-    lv_obj_set_size(obj, 480, 2);
-    lv_obj_set_pos(obj, 0, y);
-    lv_obj_set_style_bg_color(obj, col, LV_PART_MAIN);
-    lv_obj_set_style_bg_opa(obj, LV_OPA_COVER, LV_PART_MAIN);
     lv_obj_clear_flag(obj, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_pos(obj, x, y);
+    lv_obj_set_size(obj, w, h);
+
+    lv_obj_set_style_bg_color(obj, BOOT_PANEL, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(obj, LV_OPA_COVER, LV_PART_MAIN);
+    lv_obj_set_style_border_width(obj, 1, LV_PART_MAIN);
+    lv_obj_set_style_border_color(obj, BOOT_LINE, LV_PART_MAIN);
+    lv_obj_set_style_radius(obj, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_all(obj, 0, LV_PART_MAIN);
+
     return obj;
 }
 
-/* unscii_8: 8px/char → 60 chars = 480px szerokosci ekranu */
-static lv_obj_t *boot_lbl(lv_obj_t *parent, int x, int y, int w, const char *txt, lv_color_t col)
+static lv_obj_t *boot_hline(lv_obj_t *parent, int x, int y, int w, lv_color_t col)
+{
+    lv_obj_t *obj = lv_obj_create(parent);
+    lv_obj_remove_style_all(obj);
+    lv_obj_clear_flag(obj, LV_OBJ_FLAG_SCROLLABLE);
+    lv_obj_set_pos(obj, x, y);
+    lv_obj_set_size(obj, w, 1);
+    lv_obj_set_style_bg_color(obj, col, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(obj, LV_OPA_COVER, LV_PART_MAIN);
+    lv_obj_set_style_radius(obj, 0, LV_PART_MAIN);
+    return obj;
+}
+
+static lv_obj_t *boot_lbl(lv_obj_t *parent,
+                          int x, int y, int w, int h,
+                          const char *txt,
+                          lv_color_t col,
+                          lv_text_align_t align)
 {
     lv_obj_t *lbl = lv_label_create(parent);
     lv_obj_set_pos(lbl, x, y);
-    lv_obj_set_size(lbl, w, 12);
+    lv_obj_set_size(lbl, w, h);
     lv_label_set_text(lbl, txt);
     lv_label_set_long_mode(lbl, LV_LABEL_LONG_CLIP);
+
     lv_obj_set_style_text_color(lbl, col, LV_PART_MAIN);
-    lv_obj_set_style_text_font(lbl, &lv_font_unscii_8, LV_PART_MAIN);
+    lv_obj_set_style_text_font(lbl, BOOT_FONT, LV_PART_MAIN);
+    lv_obj_set_style_text_align(lbl, align, LV_PART_MAIN);
     lv_obj_set_style_bg_opa(lbl, LV_OPA_TRANSP, LV_PART_MAIN);
     lv_obj_set_style_border_width(lbl, 0, LV_PART_MAIN);
+    lv_obj_set_style_radius(lbl, 0, LV_PART_MAIN);
     lv_obj_set_style_pad_all(lbl, 0, LV_PART_MAIN);
+
     return lbl;
 }
 
-/* Prawa kolumna statusu: x=432, w=48 (6 znakow × 8px).
- * Spinner kreciacy sie dopoki nie zostanie zastapiony przez "[ OK ]". */
-static lv_obj_t *boot_spin(lv_obj_t *parent, int y)
+static void boot_style_badge(lv_obj_t *obj, lv_color_t fg, lv_color_t bg, lv_color_t border)
 {
-    lv_obj_t *t = w_ticker_create(parent, 432, y, 48, 12);
-    lv_obj_set_style_text_color(t, BOOT_FG, LV_PART_MAIN);
-    lv_obj_set_style_text_font(t, &lv_font_unscii_8, LV_PART_MAIN);
-    lv_obj_set_style_bg_opa(t, LV_OPA_TRANSP, LV_PART_MAIN);
-    lv_obj_set_style_border_width(t, 0, LV_PART_MAIN);
-    lv_obj_set_style_pad_all(t, 0, LV_PART_MAIN);
-    static const char *spin_frames[] = {"  |   ", "  /   ", "  -   ", "  \\   "};
-    w_ticker_start(t, spin_frames, 4, 150);
+    lv_obj_set_style_text_color(obj, fg, LV_PART_MAIN);
+    lv_obj_set_style_text_font(obj, BOOT_FONT, LV_PART_MAIN);
+    lv_obj_set_style_text_align(obj, LV_TEXT_ALIGN_CENTER, LV_PART_MAIN);
+
+    lv_obj_set_style_bg_color(obj, bg, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(obj, LV_OPA_COVER, LV_PART_MAIN);
+
+    lv_obj_set_style_border_width(obj, 1, LV_PART_MAIN);
+    lv_obj_set_style_border_color(obj, border, LV_PART_MAIN);
+
+    lv_obj_set_style_radius(obj, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_left(obj, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_right(obj, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_top(obj, 0, LV_PART_MAIN);
+    lv_obj_set_style_pad_bottom(obj, 0, LV_PART_MAIN);
+}
+
+static lv_obj_t *boot_badge(lv_obj_t *parent,
+                            int x, int y, int w, int h,
+                            const char *txt,
+                            lv_color_t fg, lv_color_t bg, lv_color_t border)
+{
+    lv_obj_t *lbl = lv_label_create(parent);
+    lv_obj_set_pos(lbl, x, y);
+    lv_obj_set_size(lbl, w, h);
+    lv_label_set_text(lbl, txt);
+    lv_label_set_long_mode(lbl, LV_LABEL_LONG_CLIP);
+    boot_style_badge(lbl, fg, bg, border);
+    return lbl;
+}
+
+static lv_obj_t *boot_spin_badge(lv_obj_t *parent, int x, int y, int w, int h)
+{
+    lv_obj_t *t = w_ticker_create(parent, x, y, w, h);
+    boot_style_badge(t, BOOT_ACCENT, BOOT_ACCENT_DIM, BOOT_ACCENT);
+
+    /* stale szerokosci, zeby napis nie "plywal" */
+    static const char *frames[] = {
+        "LOAD   ",
+        "LOAD.  ",
+        "LOAD.. ",
+        "LOAD..."
+    };
+    w_ticker_start(t, frames, 4, 180);
     return t;
 }
 
-/* Zatrzymuje spinner i wyswietla "[ OK ]" kolorem accent. */
+static lv_obj_t *boot_step_row(lv_obj_t *parent, int y, const char *label, bool ready)
+{
+    boot_lbl(parent, 14, y, 340, 10, label, BOOT_TEXT, LV_TEXT_ALIGN_LEFT);
+
+    if (ready) {
+        return boot_badge(parent, 372, y - 1, 76, 12,
+                          "READY", BOOT_OK, BOOT_OK_DIM, BOOT_OK);
+    }
+    return boot_spin_badge(parent, 372, y - 1, 76, 12);
+}
+
 static void boot_ok(lv_obj_t *right)
 {
     w_ticker_stop(right);
-    lv_label_set_text(right, "[ OK ]");
-    lv_obj_set_style_text_color(right, BOOT_ACCENT, LV_PART_MAIN);
+    lv_label_set_text(right, "READY");
+    boot_style_badge(right, BOOT_OK, BOOT_OK_DIM, BOOT_OK);
 }
 
-/*
- * Layout: 480x320, wszedzie unscii_8 (8px/char, 60 chars/row).
- * Lewa kolumna: x=4, w=424 (53 znaki max).
- * Prawa kolumna statusu: x=432, w=48 (6 znakow: "[ OK ]").
- * Kazda linia tekstu: h=12. Separatory: h=2.
- *
- * y=  0  sep accent (h=2)
- * y=  4  blink ticker (x=4, w=8) + tytul (x=16, w=464)    h=12
- * y= 18  sep fg
- * y= 24  podtytul                                           h=12
- * y= 38  sep fg
- * y= 46  HW left   + "[ OK ]" right                        h=12
- * y= 60  DISP left + "[ OK ]" right                        h=12
- * y= 74  TOUCH left+ "[ OK ]" right                        h=12
- * y= 88  WIFI left + spinner right           <- update      h=12
- * y=102  CFG left  + spinner right           <- update      h=12
- * y=116  LAYOUT left + spinner right         <- update      h=12
- * y=130  sep fg
- * y=136  >> PLEASE STAND BY                                 h=12
- * y=150  sep fg
- * y=156  status_lbl                          <- update      h=12
- * y=170  sep fg
- * y=176  progress bar                        <- update      h=16
- * y=194  sep fg
- * y=200  sys info                                           h=12
- * y=214  sep fg
- * y=220  hex dump                                           h=12
- * y=234  sep fg
- * y=240  SCANNER ticker, full width 480px                   h=12
- * y=254  sep fg
- * y=260  caution                                            h=12
- * y=274  sep fg
- * y=280  footer                                             h=12
- * y=294  sep accent (h=2) → konczy sie na y=296 < 320  ✓
- */
 static void make_loading_screen(void)
 {
     lv_obj_t *scr = lv_obj_create(NULL);
@@ -162,148 +204,98 @@ static void make_loading_screen(void)
     lv_obj_set_style_bg_color(scr, BOOT_BG, LV_PART_MAIN);
     lv_obj_set_style_bg_opa(scr, LV_OPA_COVER, LV_PART_MAIN);
 
-    /* ── header ── */
-    boot_sep(scr, 0, BOOT_ACCENT);
+    /* gorna linia */
+    boot_hline(scr, 0, 0, 480, BOOT_ACCENT);
 
-    /* migajacy znaczek > (► nie jest w unscii_8) */
-    lv_obj_t *blink = w_ticker_create(scr, 4, 4, 8, 12);
-    lv_obj_set_style_text_color(blink, BOOT_ACCENT, LV_PART_MAIN);
-    lv_obj_set_style_text_font(blink, &lv_font_unscii_8, LV_PART_MAIN);
-    lv_obj_set_style_bg_opa(blink, LV_OPA_TRANSP, LV_PART_MAIN);
-    lv_obj_set_style_border_width(blink, 0, LV_PART_MAIN);
-    lv_obj_set_style_pad_all(blink, 0, LV_PART_MAIN);
-    static const char *blink_frames[] = {">", " "};
-    w_ticker_start(blink, blink_frames, 2, 500);
+    /* ───────────────────────── header ───────────────────────── */
 
-    /* tytul; x=16 zeby nie nachodzic na blink ticker (8px) */
-    boot_lbl(scr, 16, 4, 464,
-             "PIP-BOY 3000 MKII  //  ROBCO INDUSTRIES UNIFIED OS",
-             BOOT_ACCENT);
+    lv_obj_t *header = boot_box(scr, 8, 8, 464, 30);
 
-    boot_sep(scr, 18, BOOT_FG);
-    boot_lbl(scr, 4, 24, 472,
-             "UNIFIED OS v2.3.1  (C) 2077 ROBCO INDUSTRIES",
-             BOOT_FG);
-    boot_sep(scr, 38, BOOT_FG);
+    lv_obj_t *accent = lv_obj_create(header);
+    lv_obj_remove_style_all(accent);
+    lv_obj_set_pos(accent, 8, 7);
+    lv_obj_set_size(accent, 4, 14);
+    lv_obj_set_style_bg_color(accent, BOOT_ACCENT, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(accent, LV_OPA_COVER, LV_PART_MAIN);
+    lv_obj_set_style_radius(accent, 0, LV_PART_MAIN);
 
-    /* ── boot log: lewa kolumna (x=4, w=424) + prawa kolumna (x=432, w=48) ── */
+    boot_lbl(header, 18, 6, 190, 10,
+             "STARTUP SEQUENCE",
+             BOOT_TEXT, LV_TEXT_ALIGN_LEFT);
 
-    /* linie statyczne — zawsze DONE */
-    boot_lbl(scr, 4,  46, 424,
-             "HARDWARE INITIALIZATION ..........................", BOOT_FG);
-    boot_lbl(scr, 432, 46, 48, "[ OK ]", BOOT_ACCENT);
+    boot_lbl(header, 250, 6, 204, 10,
+             "DISPLAY / TOUCH / NET / THEME / LAYOUT",
+             BOOT_MUTED, LV_TEXT_ALIGN_RIGHT);
 
-    boot_lbl(scr, 4,  60, 424,
-             "DISPLAY CONTROLLER ILI9488 .......................", BOOT_FG);
-    boot_lbl(scr, 432, 60, 48, "[ OK ]", BOOT_ACCENT);
+    /* ───────────────────────── stages ───────────────────────── */
 
-    boot_lbl(scr, 4,  74, 424,
-             "TOUCH INTERFACE XPT2046 ..........................", BOOT_FG);
-    boot_lbl(scr, 432, 74, 48, "[ OK ]", BOOT_ACCENT);
+    lv_obj_t *stages = boot_box(scr, 8, 46, 464, 192);
 
-    /* linie dynamiczne — prawa kolumna kreciw sie dopoki nie DONE */
-    boot_lbl(scr, 4,  88, 424,
-             "WIRELESS NETWORK IEEE 802.11n ....................", BOOT_FG);
-    g_boot.wifi_right = boot_spin(scr, 88);
+    boot_lbl(stages, 14, 8, 180, 10,
+             "INITIALIZATION",
+             BOOT_MUTED, LV_TEXT_ALIGN_LEFT);
 
-    boot_lbl(scr, 4, 102, 424,
-             "THEME CONFIGURATION ..............................", BOOT_FG);
-    g_boot.cfg_right = boot_spin(scr, 102);
+    boot_lbl(stages, 360, 8, 88, 10,
+             "STATE",
+             BOOT_MUTED, LV_TEXT_ALIGN_RIGHT);
 
-    boot_lbl(scr, 4, 116, 424,
-             "LAYOUT DATA ......................................", BOOT_FG);
-    g_boot.layout_right = boot_spin(scr, 116);
+    boot_hline(stages, 14, 22, 434, BOOT_LINE);
 
-    boot_sep(scr, 130, BOOT_FG);
+    boot_step_row(stages, 34,  "Hardware initialization", true);
+    boot_hline(stages, 14, 48, 434, BOOT_LINE);
 
-    /* ── status ── */
-    boot_lbl(scr, 4, 136, 472, "  >>  PLEASE STAND BY", BOOT_ACCENT);
-    boot_sep(scr, 150, BOOT_FG);
+    boot_step_row(stages, 60,  "Display controller ILI9488", true);
+    boot_hline(stages, 14, 74, 434, BOOT_LINE);
 
-    g_boot.status_lbl = boot_lbl(scr, 4, 156, 472,
-        "STATUS: SEARCHING FOR WIRELESS NETWORK...", BOOT_FG);
-    boot_sep(scr, 170, BOOT_FG);
+    boot_step_row(stages, 86,  "Touch interface XPT2046", true);
+    boot_hline(stages, 14, 100, 434, BOOT_LINE);
 
-    /* ── progress bar ── */
-    lv_obj_t *pbar = lv_bar_create(scr);
-    lv_obj_set_size(pbar, 464, 16);
-    lv_obj_set_pos(pbar, 8, 176);
+    g_boot.wifi_right = boot_step_row(stages, 112, "Wireless network IEEE 802.11n", false);
+    boot_hline(stages, 14, 126, 434, BOOT_LINE);
+
+    g_boot.cfg_right = boot_step_row(stages, 138, "Theme configuration", false);
+    boot_hline(stages, 14, 152, 434, BOOT_LINE);
+
+    g_boot.layout_right = boot_step_row(stages, 164, "Layout data", false);
+
+    /* ───────────────────────── status ───────────────────────── */
+
+    lv_obj_t *status = boot_box(scr, 8, 246, 464, 42);
+
+    boot_lbl(status, 14, 8, 120, 10,
+             "CURRENT STATUS",
+             BOOT_MUTED, LV_TEXT_ALIGN_LEFT);
+
+    boot_hline(status, 14, 20, 434, BOOT_LINE);
+
+    g_boot.status_lbl = boot_lbl(status, 14, 28, 434, 10,
+        "Searching for wireless network...",
+        BOOT_TEXT, LV_TEXT_ALIGN_LEFT);
+
+    /* ───────────────────────── progress ───────────────────────── */
+
+    lv_obj_t *progress = boot_box(scr, 8, 296, 464, 16);
+
+    lv_obj_t *pbar = lv_bar_create(progress);
+    lv_obj_set_size(pbar, 434, 8);
+    lv_obj_set_pos(pbar, 14, 4);
     lv_bar_set_range(pbar, 0, 100);
     lv_bar_set_value(pbar, 8, LV_ANIM_OFF);
-    lv_obj_set_style_bg_color(pbar, BOOT_DIM,    LV_PART_MAIN);
-    lv_obj_set_style_bg_opa(pbar, LV_OPA_COVER,  LV_PART_MAIN);
-    lv_obj_set_style_border_width(pbar, 1,        LV_PART_MAIN);
-    lv_obj_set_style_border_color(pbar, BOOT_FG,  LV_PART_MAIN);
-    lv_obj_set_style_radius(pbar, 0,              LV_PART_MAIN);
-    lv_obj_set_style_bg_color(pbar, BOOT_ACCENT,  LV_PART_INDICATOR);
-    lv_obj_set_style_bg_opa(pbar, LV_OPA_COVER,   LV_PART_INDICATOR);
-    lv_obj_set_style_radius(pbar, 0,              LV_PART_INDICATOR);
+
+    lv_obj_set_style_bg_color(pbar, BOOT_BAR_BG, LV_PART_MAIN);
+    lv_obj_set_style_bg_opa(pbar, LV_OPA_COVER, LV_PART_MAIN);
+    lv_obj_set_style_border_width(pbar, 1, LV_PART_MAIN);
+    lv_obj_set_style_border_color(pbar, BOOT_LINE, LV_PART_MAIN);
+    lv_obj_set_style_radius(pbar, 0, LV_PART_MAIN);
+
+    lv_obj_set_style_bg_color(pbar, BOOT_ACCENT, LV_PART_INDICATOR);
+    lv_obj_set_style_bg_opa(pbar, LV_OPA_COVER, LV_PART_INDICATOR);
+    lv_obj_set_style_radius(pbar, 0, LV_PART_INDICATOR);
+
     g_boot.progress_bar = pbar;
 
-    boot_sep(scr, 194, BOOT_FG);
-
-    /* ── system info (51 znakow × 8px = 408px ✓) ── */
-    boot_lbl(scr, 4, 200, 472,
-             "MEM: 8MB+PSRAM  CPU: 240MHz XTENSA-LX7  ESP32-S3R8",
-             BOOT_FG);
-    boot_sep(scr, 214, BOOT_FG);
-
-    /* ── hex dump (52 znaki = 416px ✓) ── */
-    boot_lbl(scr, 4, 220, 472,
-             "0000: 52 6F 62 43 6F 20 49 6E 64 75 73 74 72 69 65 73 37 12",
-             BOOT_FG);
-    boot_sep(scr, 234, BOOT_FG);
-
-    /* ── animowany scanner: full-width 480px (60 znakow × 8px), unscii_8 ──
-     * fill=16 znaków '=' przesuwa sie po 58-znakowym obszarze;
-     * ramki generowane w czasie wykonania, pingpong forward→backward.  */
-    static char scan_bufs[32][61];
-    static const char *scan_frames[32];
-    int n_scan = 0;
-    {
-        const int fill = 16, span = 42, step = 3;
-        for (int pos = 0; pos <= span && n_scan < 32; pos += step) {
-            scan_bufs[n_scan][0] = '[';
-            memset(scan_bufs[n_scan] + 1, ' ', 58);
-            memset(scan_bufs[n_scan] + 1 + pos, '=', fill);
-            scan_bufs[n_scan][59] = ']';
-            scan_bufs[n_scan][60] = '\0';
-            scan_frames[n_scan] = scan_bufs[n_scan];
-            n_scan++;
-        }
-        for (int pos = span - step; pos > 0 && n_scan < 32; pos -= step) {
-            scan_bufs[n_scan][0] = '[';
-            memset(scan_bufs[n_scan] + 1, ' ', 58);
-            memset(scan_bufs[n_scan] + 1 + pos, '=', fill);
-            scan_bufs[n_scan][59] = ']';
-            scan_bufs[n_scan][60] = '\0';
-            scan_frames[n_scan] = scan_bufs[n_scan];
-            n_scan++;
-        }
-    }
-    lv_obj_t *tkr = w_ticker_create(scr, 0, 240, 480, 12);
-    lv_obj_set_style_text_color(tkr, BOOT_ACCENT, LV_PART_MAIN);
-    lv_obj_set_style_text_font(tkr, &lv_font_unscii_8, LV_PART_MAIN);
-    lv_obj_set_style_bg_opa(tkr, LV_OPA_TRANSP, LV_PART_MAIN);
-    lv_obj_set_style_border_width(tkr, 0, LV_PART_MAIN);
-    lv_obj_set_style_pad_all(tkr, 0, LV_PART_MAIN);
-    w_ticker_start(tkr, scan_frames, n_scan, 120);
-
-    boot_sep(scr, 254, BOOT_FG);
-
-    /* ── caution (48 znakow = 384px ✓) ── */
-    boot_lbl(scr, 4, 260, 472,
-             "CAUTION: DO NOT POWER OFF DURING INITIALIZATION",
-             BOOT_ACCENT);
-    boot_sep(scr, 274, BOOT_FG);
-
-    /* ── footer (50 znakow = 400px ✓) ── */
-    boot_lbl(scr, 4, 280, 472,
-             "(C) 2077 ROBCO INDUSTRIES  //  ALL RIGHTS RESERVED",
-             BOOT_FG);
-
-    /* dolna ramka accent; konczy sie na y=296 < 320 ✓ */
-    boot_sep(scr, 294, BOOT_ACCENT);
+    /* dolna linia */
+    boot_hline(scr, 0, 319, 480, BOOT_ACCENT);
 
     lv_scr_load(scr);
 }
@@ -315,7 +307,7 @@ static void loading_wifi_ok(void)
 {
     boot_ok(g_boot.wifi_right);
     lv_label_set_text(g_boot.status_lbl,
-        "STATUS: CONNECTED — FETCHING THEME CONFIGURATION...");
+        "Connected. Downloading theme...");
     lv_bar_set_value(g_boot.progress_bar, 35, LV_ANIM_OFF);
 }
 
@@ -323,7 +315,7 @@ static void loading_theme_ok(void)
 {
     boot_ok(g_boot.cfg_right);
     lv_label_set_text(g_boot.status_lbl,
-        "STATUS: THEME LOADED - FETCHING LAYOUT DATA...");
+        "Theme loaded. Downloading layout...");
     lv_bar_set_value(g_boot.progress_bar, 65, LV_ANIM_OFF);
 }
 
@@ -331,12 +323,12 @@ static void loading_layout_ok(void)
 {
     boot_ok(g_boot.layout_right);
     lv_label_set_text(g_boot.status_lbl,
-        "STATUS: BOOT COMPLETE - LAUNCHING DASHBOARD...");
+        "Boot complete. Launching dashboard...");
     lv_bar_set_value(g_boot.progress_bar, 100, LV_ANIM_OFF);
 }
 
 /* ------------------------------------------------------------------ */
-/* WebSocket data handler                                               */
+/* WebSocket data handler                                              */
 /* ------------------------------------------------------------------ */
 
 static void ws_data_handler(const char *json)
@@ -371,7 +363,7 @@ done:
 }
 
 /* ------------------------------------------------------------------ */
-/* reply namespace handler                                              */
+/* reply namespace handler                                             */
 /* ------------------------------------------------------------------ */
 
 static void reply_handler(const char *args)
@@ -390,7 +382,7 @@ static void reply_handler(const char *args)
 }
 
 /* ------------------------------------------------------------------ */
-/* app_main                                                             */
+/* app_main                                                            */
 /* ------------------------------------------------------------------ */
 
 void app_main(void)
