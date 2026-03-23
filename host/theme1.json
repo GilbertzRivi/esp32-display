@@ -1,0 +1,84 @@
+{
+  "palette": {
+    "bg": "#0d0f14",
+    "fg": "#e6e9ef",
+    "accent": "#62c4ff",
+    "dim": "#202734",
+    "danger": "#ff6a77"
+  },
+  "font": "unscii_8",
+  "widgets": {
+    "screen": {
+      "bg_color": "bg",
+      "bg_opa": 255
+    },
+    "label": {
+      "text_color": "fg",
+      "bg_opa": 0
+    },
+    "value": {
+      "text_color": "accent",
+      "bg_opa": 0
+    },
+    "button": {
+      "bg_color": "dim",
+      "bg_opa": 220,
+      "border_width": 1,
+      "border_color": "accent",
+      "radius": 6,
+      "pad_top": 3,
+      "pad_bottom": 3,
+      "pad_left": 4,
+      "pad_right": 4,
+      "text_color": "fg",
+      "pressed_bg": "accent",
+      "pressed_text": "bg"
+    },
+    "bar": {
+      "bg_color": "dim",
+      "bg_opa": 220,
+      "border_width": 1,
+      "border_color": "accent",
+      "radius": 6,
+      "fill_color": "accent",
+      "fill_opa": 255
+    },
+    "gauge": {
+      "bg_color": "bg",
+      "bg_opa": 0,
+      "arc_color": "dim",
+      "arc_width": 8,
+      "fill_color": "accent"
+    },
+    "spinner": {
+      "arc_color": "dim",
+      "arc_width": 4,
+      "fill_color": "accent",
+      "fill_opa": 255
+    },
+    "graph": {
+      "bg_color": "bg",
+      "bg_opa": 30,
+      "border_width": 1,
+      "border_color": "dim",
+      "radius": 6
+    },
+    "sparkline": {
+      "bg_opa": 0,
+      "border_width": 0,
+      "radius": 0
+    },
+    "container": {
+      "bg_opa": 0,
+      "border_width": 0,
+      "radius": 0,
+      "pad_gap": 0
+    },
+    "ticker": {
+      "text_color": "accent"
+    },
+    "icon": {
+      "text_color": "accent"
+    }
+  }
+}

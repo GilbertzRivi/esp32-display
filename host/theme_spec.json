@@ -1,0 +1,272 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$id": "esp32-display/theme",
+  "title": "theme.json",
+  "description": "Konfiguracja wyglądu całego dashboardu. Ładowana raz przy starcie przez HTTP GET /theme. Po hot-reload urządzenie restartuje i pobiera ponownie.",
+  "type": "object",
+  "additionalProperties": false,
+
+  "$defs": {
+
+    "color": {
+      "description": "Kolor jako hex '#rrggbb' lub nazwa z palety: 'bg' | 'fg' | 'accent' | 'dim' | 'danger'",
+      "type": "string",
+      "examples": ["#040c02", "#5fff35", "fg", "accent", "dim"]
+    },
+
+    "opacity": {
+      "description": "Krycie w skali LVGL: 0 = przeźroczysty, 255 = pełny. Stałe: LV_OPA_TRANSP=0, LV_OPA_50=127, LV_OPA_COVER=255.",
+      "type": "integer",
+      "minimum": 0,
+      "maximum": 255
+    },
+
+    "px": {
+      "description": "Wartość w pikselach.",
+      "type": "integer",
+      "minimum": 0
+    },
+
+    "widget_style": {
+      "description": "Zestaw overrideów stylu dla danego typu widgetu. Tylko podane pola są aplikowane — reszta pochodzi z domyślnych styli theme. Aplikowane jako lokalne style LVGL (najwyższy priorytet, nadpisują theme_apply).",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+
+        "bg_color":     { "$ref": "#/$defs/color",   "description": "Kolor tła obiektu (LV_PART_MAIN)." },
+        "bg_opa":       { "$ref": "#/$defs/opacity", "description": "Krycie tła. 0=przeźroczysty, 255=pełny." },
+
+        "border_color": { "$ref": "#/$defs/color",   "description": "Kolor ramki." },
+        "border_width": { "$ref": "#/$defs/px",      "description": "Grubość ramki w px. 0 = brak ramki." },
+        "border_opa":   { "$ref": "#/$defs/opacity", "description": "Krycie ramki." },
+
+        "radius": {
+          "type": "integer",
+          "minimum": 0,
+          "description": "Zaokrąglenie narożników w px. 0 = ostre rogi. Specjalna wartość LV_RADIUS_CIRCLE (32767) = pełne koło/pigułka."
+        },
+
+        "pad_all": {
+          "$ref": "#/$defs/px",
+          "description": "Skrót: ustawia pad_top, pad_bottom, pad_left, pad_right naraz."
+        },
+        "pad_top":    { "$ref": "#/$defs/px", "description": "Padding górny (px)." },
+        "pad_bottom": { "$ref": "#/$defs/px", "description": "Padding dolny (px)." },
+        "pad_left":   { "$ref": "#/$defs/px", "description": "Padding lewy (px)." },
+        "pad_right":  { "$ref": "#/$defs/px", "description": "Padding prawy (px)." },
+        "pad_gap": {
+          "$ref": "#/$defs/px",
+          "description": "Odstęp między dziećmi w kontenerze flex (row/column). Ustawia lv_pad_row i lv_pad_column."
+        },
+
+        "text_color":   { "$ref": "#/$defs/color",   "description": "Kolor tekstu." },
+        "text_opa":     { "$ref": "#/$defs/opacity", "description": "Krycie tekstu." },
+        "letter_space": { "type": "integer",          "description": "Odstęp między znakami w px (może być ujemny)." },
+        "line_space":   { "type": "integer",          "description": "Dodatkowy odstęp między liniami tekstu w px." },
+        "font": {
+          "type": "string",
+          "enum": ["unscii_8", "unscii_16", "montserrat_12", "montserrat_14", "montserrat_20"],
+          "description": "Czcionka. Musi być włączona w sdkconfig (LV_FONT_*)."
+        },
+
+        "fill_color": {
+          "$ref": "#/$defs/color",
+          "description": "Kolor wypełnienia wskaźnika (LV_PART_INDICATOR). Dla bar: kolor pasku. Dla gauge/spinner: kolor łuku aktywnego. Ustawia jednocześnie bg_color i arc_color na INDICATOR."
+        },
+        "fill_opa": {
+          "$ref": "#/$defs/opacity",
+          "description": "Krycie wypełnienia wskaźnika (LV_PART_INDICATOR)."
+        },
+
+        "arc_color": {
+          "$ref": "#/$defs/color",
+          "description": "Kolor toru łuku (LV_PART_MAIN). Dla gauge/spinner: kolor nieaktywnego toru w tle."
+        },
+        "arc_width": {
+          "$ref": "#/$defs/px",
+          "description": "Grubość łuku w px. Dotyczy gauge i spinner."
+        },
+
+        "line_color": { "$ref": "#/$defs/color", "description": "Kolor linii (lv_line). Rzadko używane." },
+        "line_width": { "$ref": "#/$defs/px",   "description": "Grubość linii w px (lv_line)." },
+
+        "pressed_bg": {
+          "$ref": "#/$defs/color",
+          "description": "Kolor tła przycisku po wciśnięciu (LV_STATE_PRESSED). Dotyczy button."
+        },
+        "pressed_text": {
+          "$ref": "#/$defs/color",
+          "description": "Kolor tekstu przycisku po wciśnięciu (LV_STATE_PRESSED). Dotyczy button."
+        },
+
+        "shadow_color": { "$ref": "#/$defs/color", "description": "Kolor cienia." },
+        "shadow_width": { "$ref": "#/$defs/px",   "description": "Rozmiar cienia (rozmycie) w px. 0 = brak cienia." },
+
+        "outline_color": { "$ref": "#/$defs/color", "description": "Kolor konturu (wyrenderowany poza ramką, osobna warstwa)." },
+        "outline_width": { "$ref": "#/$defs/px",   "description": "Grubość konturu w px. 0 = brak." }
+      }
+    },
+
+    "widget_style_with_indicator": {
+      "description": "Widget style z opcjonalnym sub-obiektem 'indicator' dla części LV_PART_INDICATOR (pasek fill, łuk fill).",
+      "allOf": [{ "$ref": "#/$defs/widget_style" }],
+      "properties": {
+        "indicator": {
+          "$ref": "#/$defs/widget_style",
+          "description": "Styl LV_PART_INDICATOR — aktywna część widgetu (fill paska, aktywny łuk gauge/spinner)."
+        }
+      }
+    },
+
+    "font_name": {
+      "type": "string",
+      "enum": ["unscii_8", "unscii_16", "montserrat_12", "montserrat_14", "montserrat_20"],
+      "description": "Nazwa czcionki. Dostępne jeśli włączone w sdkconfig."
+    }
+  },
+
+  "properties": {
+
+    "palette": {
+      "description": "Globalna paleta kolorów. Nazwy są referencjami używanymi we wszystkich sekcjach 'color' w theme i layout.",
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["bg", "fg", "accent", "dim"],
+      "properties": {
+        "bg":     { "type": "string", "description": "Kolor tła ekranu i większości obiektów.", "examples": ["#040c02"] },
+        "fg":     { "type": "string", "description": "Kolor tekstu i linii pierwszoplanowych.",  "examples": ["#5fff35"] },
+        "accent": { "type": "string", "description": "Kolor akcentu: aktywne elementy, fill pasków, aktywny łuk.", "examples": ["#a0ff50"] },
+        "dim":    { "type": "string", "description": "Kolor przytłumiony: tła przycisków, tory łuków, separatory.", "examples": ["#0c2006"] },
+        "danger": { "type": "string", "description": "Kolor alarmowy (opcjonalny). Używany przez thresholdy grafów.", "examples": ["#c25757"] }
+      }
+    },
+
+    "font": {
+      "$ref": "#/$defs/font_name",
+      "description": "Domyślna czcionka dla wszystkich widgetów. Można nadpisać per-typ w 'widgets' lub per-widget w layout 'style'.",
+      "default": "unscii_8"
+    },
+
+    "widgets": {
+      "description": "Per-typ overriedy stylu. Każdy klucz to nazwa typu widgetu. Tylko podane właściwości nadpisują domyślne style — reszta zostaje niezmieniona.",
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+
+        "screen": {
+          "$ref": "#/$defs/widget_style",
+          "description": "Styl ekranu (tło za wszystkimi widgetami). Domyślnie: bg_color=bg, brak ramki, brak paddingu."
+        },
+
+        "label": {
+          "$ref": "#/$defs/widget_style",
+          "description": "Styl etykiet tekstowych. Domyślnie: text_color=fg, tło przeźroczyste."
+        },
+
+        "button": {
+          "allOf": [{ "$ref": "#/$defs/widget_style" }],
+          "description": "Styl przycisku. pressed_bg i pressed_text automatycznie aplikowane do LV_STATE_PRESSED. Domyślnie: bg=dim, border=fg, text=fg.",
+          "properties": {
+            "indicator": false
+          }
+        },
+
+        "bar": {
+          "$ref": "#/$defs/widget_style_with_indicator",
+          "description": "Styl paska postępu. 'indicator' = wypełnienie aktywne. Domyślnie: bg=dim, border=fg, indicator.fill=accent."
+        },
+
+        "gauge": {
+          "$ref": "#/$defs/widget_style_with_indicator",
+          "description": "Styl wskaźnika kołowego (lv_arc). arc_color = tor nieaktywny (MAIN). indicator.fill_color = tor aktywny (INDICATOR). arc_width obowiązuje obie warstwy jeśli nie nadpisano."
+        },
+
+        "spinner": {
+          "$ref": "#/$defs/widget_style_with_indicator",
+          "description": "Styl kręcącego się kółka (lv_spinner). Analogicznie do gauge: arc_color = tło, indicator.fill_color = obracający się łuk."
+        },
+
+        "graph": {
+          "allOf": [{ "$ref": "#/$defs/widget_style" }],
+          "description": "Styl kontenera wykresu liniowego. Kolory linii/słupków konfigurowane osobno przez graph_config_t (nie przez widget_style).",
+          "properties": {
+            "style": {
+              "type": "string",
+              "enum": ["line", "area", "bars", "symmetric"],
+              "description": "Typ wizualizacji wykresu.\n• line: prosta linia łącząca punkty.\n• area: linia z wypełnieniem pod spodem.\n• bars: słupki pionowe (domyślne).\n• symmetric: symetryczne słupki od środka (środkowa wartość = 0).",
+              "default": "bars"
+            }
+          }
+        },
+
+        "sparkline": {
+          "$ref": "#/$defs/widget_style",
+          "description": "Styl kompaktowego wykresu inline. Domyślnie: przeźroczyste tło, brak ramki. Kolor linii przez graph_config_t."
+        },
+
+        "icon": {
+          "$ref": "#/$defs/widget_style",
+          "description": "Styl ikony (pojedynczy znak). Domyślnie: text_color=accent."
+        },
+
+        "container": {
+          "$ref": "#/$defs/widget_style",
+          "description": "Styl kontenera layoutu (row/column/grid). pad_gap ustawia odstęp między dziećmi. Domyślnie: przeźroczyste tło, brak ramki."
+        },
+
+        "ticker": {
+          "$ref": "#/$defs/widget_style",
+          "description": "Styl animowanego napisu (frames[]). Domyślnie: text_color=fg, tło przeźroczyste."
+        },
+
+        "value": {
+          "$ref": "#/$defs/widget_style",
+          "description": "Styl etykiety wartości (wewnętrzna etykieta gauge i bar). Domyślnie: text_color=accent."
+        },
+
+        "toggle": {
+          "allOf": [{ "$ref": "#/$defs/widget_style" }],
+          "description": "Styl przełącznika (lv_switch). Własność 'checked' opisuje wygląd stanu ON.",
+          "properties": {
+            "checked": {
+              "$ref": "#/$defs/widget_style",
+              "description": "Styl nakładany w stanie LV_STATE_CHECKED (włączony)."
+            }
+          }
+        }
+      }
+    }
+  },
+
+  "examples": [
+    {
+      "palette": {
+        "bg":     "#040c02",
+        "fg":     "#5fff35",
+        "accent": "#a0ff50",
+        "dim":    "#0c2006"
+      },
+      "font": "unscii_8",
+      "widgets": {
+        "bar": {
+          "bg_color": "dim", "border_width": 1, "border_color": "fg", "radius": 0,
+          "indicator": { "fill_color": "accent", "radius": 0 }
+        },
+        "button": {
+          "bg_color": "dim", "border_width": 1, "border_color": "fg",
+          "radius": 0, "pad_all": 4, "text_color": "fg",
+          "pressed_bg": "accent", "pressed_text": "bg"
+        },
+        "gauge": {
+          "bg_color": "bg", "arc_color": "dim", "arc_width": 8,
+          "indicator": { "fill_color": "accent", "arc_width": 8 }
+        },
+        "spinner": {
+          "arc_color": "dim", "arc_width": 4,
+          "indicator": { "fill_color": "accent", "arc_width": 4 }
+        },
+        "graph": { "bg_color": "bg", "border_width": 1, "border_color": "dim", "style": "bars" }
+      }
+    }
+  ]
+}

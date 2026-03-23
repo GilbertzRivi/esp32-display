@@ -1,0 +1,259 @@
+# config_spec.toml — pełna specyfikacja konfiguracji hosta esp32-display
+#
+# Plik wczytywany przez `config::load(path)` (domyślnie "config.toml").
+# Brakujące sekcje / klucze mają wartości domyślne — jedyna sekcja obowiązkowa
+# to [server] i [artifacts], ale i one mają sensowne defaults.
+#
+# Typy wartości:
+#   string   = "tekst"
+#   int      = 1234
+#   bool     = true / false
+#   array    = [[section]] (TOML array of tables)
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# [server]
+# Konfiguracja serwera HTTP + WebSocket.
+# ─────────────────────────────────────────────────────────────────────────────
+
+[server]
+
+# Adres IP na którym serwer nasłuchuje.
+# "0.0.0.0" = wszystkie interfejsy, "127.0.0.1" = tylko localhost.
+# Domyślnie: "0.0.0.0"
+host = "0.0.0.0"
+
+# Port TCP.
+# ESP32 musi mieć ten sam port w CONFIG_HOST_URL (idf.py menuconfig).
+# Domyślnie: 1234
+port = 1234
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# [artifacts]
+# Ścieżki do plików serwowanych urządzeniu przez HTTP GET.
+# ─────────────────────────────────────────────────────────────────────────────
+
+[artifacts]
+
+# Plik layout JSON — pobierany przez ESP32 jako GET /layout.
+# Domyślnie: "layout.json"
+layout = "layout.json"
+
+# Plik theme JSON — pobierany przez ESP32 jako GET /theme.
+# Domyślnie: "theme.json"
+theme  = "theme.json"
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# [[sources]]
+# Źródła danych wysyłanych do urządzenia przez WebSocket.
+# Każdy source odpowiada jednemu lub wielu placeholderom w layout.json.
+# Sekcja jest tablicą — można dodać dowolną liczbę wpisów.
+# ─────────────────────────────────────────────────────────────────────────────
+#
+# Wspólne pola dla wszystkich source:
+#
+#   placeholder  (string, wymagane)
+#     Nazwa klucza aktualizowanego w stanie i wysyłanego do urządzenia.
+#     Musi odpowiadać "$placeholder" z layout.json (bez znaku $).
+#     Wyjątek: command z wyjściem JSON może aktualizować wiele kluczy naraz
+#     (patrz sekcja "command + JSON output" niżej).
+#
+#   kind  (string, wymagane)
+#     Rodzaj źródła: "builtin" lub "command".
+#
+#   interval_ms  (int, opcjonalne)
+#     Częstotliwość odczytu w milisekundach.
+#     Domyślnie: 1000
+#     Nie dotyczy trybu push (source sam decyduje kiedy emituje).
+
+
+# ── kind = "builtin" ─────────────────────────────────────────────────────────
+#
+# Wbudowane metryki systemowe przez bibliotekę sysinfo.
+# Wymagane dodatkowe pole:
+#
+#   metric  (string, wymagane dla builtin)
+#     Nazwa metryki. Dostępne wartości:
+#
+#     "cpu_percent"       — globalne użycie CPU w % (0–100, integer string)
+#     "cpu_N_percent"     — użycie rdzenia N (0-indexed), np. "cpu_0_percent"
+#     "ram_used_gb"       — zajęta pamięć RAM w GB (float 1 miejsce po przecinku)
+#     "ram_total_gb"      — całkowita pamięć RAM w GB
+#     "ram_percent"       — zajęta pamięć RAM w % (0–100, integer string)
+#     "uptime_s"          — czas działania systemu w sekundach (integer string)
+#     "disk_used_gb"      — zajęte miejsce na dysku "/" w GB
+#     "disk_percent"      — zajęte miejsce na dysku "/" w %
+
+[[sources]]
+placeholder = "cpu_usage"
+kind        = "builtin"
+metric      = "cpu_percent"
+interval_ms = 1000
+
+[[sources]]
+placeholder = "cpu_core0"
+kind        = "builtin"
+metric      = "cpu_0_percent"
+interval_ms = 1000
+
+[[sources]]
+placeholder = "ram_percent"
+kind        = "builtin"
+metric      = "ram_percent"
+interval_ms = 2000
+
+[[sources]]
+placeholder = "ram_used"
+kind        = "builtin"
+metric      = "ram_used_gb"
+interval_ms = 2000
+
+[[sources]]
+placeholder = "ram_total"
+kind        = "builtin"
+metric      = "ram_total_gb"
+interval_ms = 60000
+
+[[sources]]
+placeholder = "disk_percent"
+kind        = "builtin"
+metric      = "disk_percent"
+interval_ms = 5000
+
+[[sources]]
+placeholder = "disk_used"
+kind        = "builtin"
+metric      = "disk_used_gb"
+interval_ms = 5000
+
+[[sources]]
+placeholder = "uptime_s"
+kind        = "builtin"
+metric      = "uptime_s"
+interval_ms = 10000
+
+
+# ── kind = "command", mode = "shot" (domyślny) ───────────────────────────────
+#
+# Uruchamia komendę (przez `sh -c`) co interval_ms i bierze jej stdout.
+#
+# Wymagane pola:
+#   command  (string) — polecenie shell
+#
+# Opcjonalne:
+#   mode = "shot"  — domyślne, nie trzeba podawać
+#
+# Wyjście komendy może być:
+#   a) zwykły string — aktualizuje `placeholder`
+#   b) JSON object   — aktualizuje wiele kluczy naraz:
+#      {"cpu": "72", "temp": "45"} → placeholder "cpu" i "temp" niezależnie
+#      (pole `placeholder` staje się fallbackiem jeśli output nie jest JSON)
+
+[[sources]]
+placeholder = "uptime_fmt"
+kind        = "command"
+mode        = "shot"
+command     = "awk '{h=int($1/3600);m=int(($1%3600)/60);printf \"%dh %02dm\",h,m}' /proc/uptime"
+interval_ms = 10000
+
+[[sources]]
+placeholder = "gpu_temp"
+kind        = "command"
+mode        = "shot"
+command     = "nvidia-smi --query-gpu=temperature.gpu --format=csv,noheader,nounits"
+interval_ms = 2000
+
+# Przykład JSON output — jedna komenda, wiele placeholderów:
+[[sources]]
+placeholder = "net_rx"
+kind        = "command"
+mode        = "shot"
+command     = """
+  rx=$(cat /sys/class/net/eth0/statistics/rx_bytes)
+  tx=$(cat /sys/class/net/eth0/statistics/tx_bytes)
+  printf '{\"net_rx\":\"%s\",\"net_tx\":\"%s\"}' "$rx" "$tx"
+"""
+interval_ms = 1000
+
+
+# ── kind = "command", mode = "push" ──────────────────────────────────────────
+#
+# Uruchamia komendę raz i czyta jej stdout wiersz po wierszu.
+# Każdy wiersz = nowa wartość (lub JSON object z wieloma kluczami).
+# Komenda żyje dopóki emituje linie; po jej śmierci restartuje po 3s.
+# interval_ms ignorowane — source sam kontroluje tempo.
+#
+# Idealny dla: skryptów które same czekają (inotifywait, journalctl -f, sensors -A).
+
+[[sources]]
+placeholder = "now_playing"
+kind        = "command"
+mode        = "push"
+command     = "playerctl --follow metadata --format '{{artist}} - {{title}}'"
+
+[[sources]]
+placeholder = "journal_last"
+kind        = "command"
+mode        = "push"
+command     = "journalctl -n0 -f -o cat"
+
+
+# ── kind = "command", mode = "pull" ──────────────────────────────────────────
+#
+# Uruchamia komendę raz, trzyma jej stdin/stdout otwarte.
+# Co interval_ms wysyła newline na stdin → komenda odpowiada jedną linią na stdout.
+# Komenda musi być interaktywna (czyta newline, wypisuje odpowiedź, pętla).
+# Po śmierci restartuje po 3s.
+#
+# Idealny dla: zewnętrznych agentów, skryptów z ciężką inicjalizacją (np. Python
+# który raz ładuje model i potem odpowiada szybko na każde zapytanie).
+
+[[sources]]
+placeholder = "custom_metric"
+kind        = "command"
+mode        = "pull"
+command     = "/usr/local/bin/my-agent"
+interval_ms = 500
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# [[events]]
+# Mapowanie eventów przychodzących z urządzenia na komendy shell.
+# Urządzenie wysyła {"event":"namespace.action"} przez WebSocket gdy użytkownik
+# tapnie przycisk z on_tap="reply.namespace.action".
+# ─────────────────────────────────────────────────────────────────────────────
+#
+# Pola:
+#   event    (string) — nazwa eventu, format dowolny, zwykle "namespace.action"
+#   command  (string) — polecenie shell uruchamiane przez `sh -c` po odebraniu eventu
+#                       wykonywane fire-and-forget (spawn bez czekania na wynik)
+
+[[events]]
+event   = "spotify.next"
+command = "playerctl next"
+
+[[events]]
+event   = "spotify.prev"
+command = "playerctl previous"
+
+[[events]]
+event   = "spotify.toggle"
+command = "playerctl play-pause"
+
+[[events]]
+event   = "volume.up"
+command = "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%+"
+
+[[events]]
+event   = "volume.down"
+command = "wpctl set-volume @DEFAULT_AUDIO_SINK@ 5%-"
+
+[[events]]
+event   = "screen.lock"
+command = "loginctl lock-session"
+
+[[events]]
+event   = "notify.test"
+command = "notify-send 'ESP32' 'event received'"
