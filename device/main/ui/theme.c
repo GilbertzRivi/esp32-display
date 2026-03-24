@@ -89,6 +89,27 @@ void ws_parse(jparse_ctx_t *jctx, widget_style_t *ws)
     _COLOR("outline_color", outline_color, WS_OUTLINE_COLOR)
     _INT  ("outline_width", outline_width, WS_OUTLINE_WIDTH)
 
+    /* text_align: "left" | "center" | "right" */
+    if (json_obj_get_string(jctx, "text_align", sval, sizeof(sval)) == OS_SUCCESS) {
+        if      (strcmp(sval, "center") == 0) { ws->text_align = LV_TEXT_ALIGN_CENTER; ws->flags |= WS_TEXT_ALIGN; }
+        else if (strcmp(sval, "right")  == 0) { ws->text_align = LV_TEXT_ALIGN_RIGHT;  ws->flags |= WS_TEXT_ALIGN; }
+        else if (strcmp(sval, "left")   == 0) { ws->text_align = LV_TEXT_ALIGN_LEFT;   ws->flags |= WS_TEXT_ALIGN; }
+    }
+
+    /* justify (flex main axis): "start"|"end"|"center"|"space-between"|"space-around"|"space-evenly" */
+    if (json_obj_get_string(jctx, "justify", sval, sizeof(sval)) == OS_SUCCESS) {
+        lv_flex_align_t ja = LV_FLEX_ALIGN_START;
+        bool ok = true;
+        if      (strcmp(sval, "start")         == 0) ja = LV_FLEX_ALIGN_START;
+        else if (strcmp(sval, "end")           == 0) ja = LV_FLEX_ALIGN_END;
+        else if (strcmp(sval, "center")        == 0) ja = LV_FLEX_ALIGN_CENTER;
+        else if (strcmp(sval, "space-between") == 0) ja = LV_FLEX_ALIGN_SPACE_BETWEEN;
+        else if (strcmp(sval, "space-around")  == 0) ja = LV_FLEX_ALIGN_SPACE_AROUND;
+        else if (strcmp(sval, "space-evenly")  == 0) ja = LV_FLEX_ALIGN_SPACE_EVENLY;
+        else ok = false;
+        if (ok) { ws->flex_justify = ja; ws->flags |= WS_FLEX_JUSTIFY; }
+    }
+
     /* pad_all — skrot, ustawia wszystkie 4 strony */
     if (json_obj_get_int(jctx, "pad_all", &ival) == OS_SUCCESS) {
         ws->pad_top = ws->pad_bottom = ws->pad_left = ws->pad_right = (int16_t)ival;
@@ -115,12 +136,22 @@ void ws_apply(const widget_style_t *ws, lv_obj_t *obj, lv_style_selector_t sel)
     if (ws->flags & WS_BORDER_COLOR) lv_obj_set_style_border_color(obj, ws->border_color, sel);
     if (ws->flags & WS_BORDER_WIDTH) lv_obj_set_style_border_width(obj, ws->border_width, sel);
     if (ws->flags & WS_BORDER_OPA)   lv_obj_set_style_border_opa(obj, ws->border_opa, sel);
-    if (ws->flags & WS_RADIUS)       lv_obj_set_style_radius(obj, ws->radius, sel);
+
+    if (ws->flags & WS_RADIUS) {
+        lv_obj_set_style_radius(obj, ws->radius, sel);
+        lv_obj_set_style_clip_corner(obj, ws->radius > 0, sel);
+    }
+
     if (ws->flags & WS_PAD_TOP)      lv_obj_set_style_pad_top(obj, ws->pad_top, sel);
     if (ws->flags & WS_PAD_BOTTOM)   lv_obj_set_style_pad_bottom(obj, ws->pad_bottom, sel);
     if (ws->flags & WS_PAD_LEFT)     lv_obj_set_style_pad_left(obj, ws->pad_left, sel);
     if (ws->flags & WS_PAD_RIGHT)    lv_obj_set_style_pad_right(obj, ws->pad_right, sel);
-    if (ws->flags & WS_PAD_GAP)      lv_obj_set_style_pad_gap(obj, ws->pad_gap, sel);
+    if (ws->flags & WS_PAD_GAP) {
+        lv_obj_set_style_pad_gap(obj, ws->pad_gap, sel);
+        lv_obj_set_style_pad_row(obj, ws->pad_gap, sel);
+        lv_obj_set_style_pad_column(obj, ws->pad_gap, sel);
+    }
+
     if (ws->flags & WS_TEXT_COLOR)   lv_obj_set_style_text_color(obj, ws->text_color, sel);
     if (ws->flags & WS_TEXT_OPA)     lv_obj_set_style_text_opa(obj, ws->text_opa, sel);
     if (ws->flags & WS_LETTER_SPACE) lv_obj_set_style_text_letter_space(obj, ws->letter_space, sel);
@@ -134,6 +165,8 @@ void ws_apply(const widget_style_t *ws, lv_obj_t *obj, lv_style_selector_t sel)
     if (ws->flags & WS_SHADOW_WIDTH) lv_obj_set_style_shadow_width(obj, ws->shadow_width, sel);
     if (ws->flags & WS_OUTLINE_COLOR) lv_obj_set_style_outline_color(obj, ws->outline_color, sel);
     if (ws->flags & WS_OUTLINE_WIDTH) lv_obj_set_style_outline_width(obj, ws->outline_width, sel);
+    if (ws->flags & WS_TEXT_ALIGN)    lv_obj_set_style_text_align(obj, ws->text_align, sel);
+    if (ws->flags & WS_FLEX_JUSTIFY)  lv_obj_set_style_flex_main_place(obj, ws->flex_justify, sel);
 
     /* fill_* zawsze uderza w INDICATOR — bg i arc obie sciezki */
     if (ws->flags & WS_FILL_COLOR) {
@@ -179,6 +212,7 @@ int theme_spinner_speed_ms(void)    { return g_theme.spinner_speed_ms; }
 int theme_spinner_arc_deg(void)     { return g_theme.spinner_arc_deg; }
 int theme_container_gap(void)       { return g_theme.container_gap; }
 int theme_gauge_arc_width(int dim)  { return LV_MAX(2, dim / 10); }
+int theme_rotation(void)            { return g_theme.rotation; }
 
 void theme_build_styles(void)
 {
@@ -199,8 +233,6 @@ void theme_build_styles(void)
     lv_style_set_text_font(&style_label, font);
     lv_style_set_pad_all(&style_label, 0);
 
-    /* button: terminal-styl — ciemne tlo, FG tekst i border.
-       wcisniety: pelna inwersja (FG tlo, BG tekst) */
     lv_style_reset(&style_button);
     lv_style_set_bg_color(&style_button, p[THEME_DIM]);
     lv_style_set_bg_opa(&style_button, LV_OPA_COVER);
@@ -280,9 +312,6 @@ void theme_build_styles(void)
     lv_style_set_text_font(&style_value, font);
     lv_style_set_pad_all(&style_value, 0);
 
-    /* toggle: prostokat (radius=0).
-       OFF: DIM bg, FG border, FG knob po lewej.
-       ON:  caly MAIN bg zmienia sie na ACCENT — wyrazna inwersja. */
     lv_style_reset(&style_toggle);
     lv_style_set_bg_color(&style_toggle, p[THEME_DIM]);
     lv_style_set_bg_opa(&style_toggle, LV_OPA_COVER);
@@ -294,12 +323,10 @@ void theme_build_styles(void)
     lv_style_set_bg_color(&style_toggle_checked, p[THEME_ACCENT]);
     lv_style_set_bg_opa(&style_toggle_checked, LV_OPA_COVER);
 
-    /* indicator transparentny — MAIN bg obsługuje kolor ON/OFF */
     lv_style_reset(&style_toggle_ind);
     lv_style_set_bg_opa(&style_toggle_ind, LV_OPA_TRANSP);
     lv_style_set_radius(&style_toggle_ind, 0);
 
-    /* knob: BG (ciemny) kontrastuje zarówno z DIM jak i ACCENT */
     lv_style_reset(&style_toggle_knob);
     lv_style_set_bg_color(&style_toggle_knob, p[THEME_FG]);
     lv_style_set_bg_opa(&style_toggle_knob, LV_OPA_COVER);
@@ -309,14 +336,13 @@ void theme_build_styles(void)
 
 void theme_init(void)
 {
-    /* Domyslna paleta = Pip-Boy phosphor green.
-       Widoczna na loading screenie zanim host zaserwuje theme.json. */
     g_theme.palette[THEME_BG]     = lv_color_hex(0x040c02);
     g_theme.palette[THEME_FG]     = lv_color_hex(0x5fff35);
     g_theme.palette[THEME_ACCENT] = lv_color_hex(0xa0ff50);
     g_theme.palette[THEME_DIM]    = lv_color_hex(0x0c2006);
     g_theme.palette[THEME_DANGER] = lv_color_hex(0xc25757);
 
+    g_theme.rotation         = 0;
     g_theme.font             = &lv_font_unscii_8;
     g_theme.button_pad       = 4;
     g_theme.button_border_w  = 1;
@@ -351,7 +377,6 @@ void theme_init(void)
     g_theme.sparkline.y_max       = 100;
     g_theme.sparkline.point_count = 0;
 
-    /* Zerowanie wszystkich ws_* — flagi == 0 oznacza brak overridera */
     memset(&g_theme.ws_screen,          0, sizeof(widget_style_t));
     memset(&g_theme.ws_label,           0, sizeof(widget_style_t));
     memset(&g_theme.ws_button,          0, sizeof(widget_style_t));
@@ -401,7 +426,6 @@ esp_err_t theme_load_json(const char *json)
     if (json_parse_start(&jctx, json, (int)strlen(json)) != OS_SUCCESS)
         return ESP_FAIL;
 
-    /* palette */
     if (json_obj_get_object(&jctx, "palette") == OS_SUCCESS) {
         static const struct { const char *key; theme_color_role_t role; } map[] = {
             {"bg",     THEME_BG},
@@ -421,22 +445,28 @@ esp_err_t theme_load_json(const char *json)
         json_obj_leave_object(&jctx);
     }
 
-    /* font */
+    int rot_val;
+    if (json_obj_get_int(&jctx, "rotation", &rot_val) == OS_SUCCESS) {
+        if (rot_val == 90 || rot_val == 180 || rot_val == 270)
+            g_theme.rotation = rot_val;
+        else
+            g_theme.rotation = 0;
+    }
+
     char fontname[32];
     if (json_obj_get_string(&jctx, "font", fontname, sizeof(fontname)) == OS_SUCCESS) {
         const lv_font_t *f = theme_font_by_name(fontname);
         if (f) g_theme.font = f;
     }
 
-    /* widgets — style overrides + graph config */
     if (json_obj_get_object(&jctx, "widgets") == OS_SUCCESS) {
 
-        /* Per-type widget style overrides */
 #define _WS_TYPE(key, field) \
         if (json_obj_get_object(&jctx, key) == OS_SUCCESS) { \
             ws_parse(&jctx, &g_theme.field); \
             json_obj_leave_object(&jctx); \
         }
+
 #define _WS_TYPE_IND(key, field, ind_field) \
         if (json_obj_get_object(&jctx, key) == OS_SUCCESS) { \
             ws_parse(&jctx, &g_theme.field); \
@@ -454,12 +484,10 @@ esp_err_t theme_load_json(const char *json)
         _WS_TYPE    ("ticker",    ws_ticker)
         _WS_TYPE    ("value",     ws_value)
         _WS_TYPE    ("container", ws_container)
-        _WS_TYPE    ("sparkline", ws_sparkline)
         _WS_TYPE_IND("bar",     ws_bar,     ws_bar_ind)
         _WS_TYPE_IND("gauge",   ws_gauge,   ws_gauge_ind)
         _WS_TYPE_IND("spinner", ws_spinner, ws_spinner_ind)
 
-        /* toggle osobny: sub-object "checked" dla stanu ON */
         if (json_obj_get_object(&jctx, "toggle") == OS_SUCCESS) {
             ws_parse(&jctx, &g_theme.ws_toggle);
             if (json_obj_get_object(&jctx, "checked") == OS_SUCCESS) {
@@ -469,16 +497,77 @@ esp_err_t theme_load_json(const char *json)
             json_obj_leave_object(&jctx);
         }
 
-        /* graph: style string + ws overrides */
         if (json_obj_get_object(&jctx, "graph") == OS_SUCCESS) {
             ws_parse(&jctx, &g_theme.ws_graph);
-            char style[16];
-            if (json_obj_get_string(&jctx, "style", style, sizeof(style)) == OS_SUCCESS) {
-                if      (strcmp(style, "line")      == 0) g_theme.graph.style = GRAPH_STYLE_LINE;
-                else if (strcmp(style, "area")      == 0) g_theme.graph.style = GRAPH_STYLE_AREA;
-                else if (strcmp(style, "bars")      == 0) g_theme.graph.style = GRAPH_STYLE_BARS;
-                else if (strcmp(style, "symmetric") == 0) g_theme.graph.style = GRAPH_STYLE_SYMMETRIC;
+
+            char gstr[16];
+            int  gint;
+            if (json_obj_get_string(&jctx, "style", gstr, sizeof(gstr)) == OS_SUCCESS) {
+                if      (strcmp(gstr, "line")      == 0) g_theme.graph.style = GRAPH_STYLE_LINE;
+                else if (strcmp(gstr, "area")      == 0) g_theme.graph.style = GRAPH_STYLE_AREA;
+                else if (strcmp(gstr, "bars")      == 0) g_theme.graph.style = GRAPH_STYLE_BARS;
+                else if (strcmp(gstr, "symmetric") == 0) g_theme.graph.style = GRAPH_STYLE_SYMMETRIC;
             }
+
+#define _GI(key, field) \
+            if (json_obj_get_int(&jctx, key, &gint) == OS_SUCCESS) g_theme.graph.field = gint;
+            _GI("bar_width",    bar_width)
+            _GI("bar_gap",      bar_gap)
+            _GI("line_width",   line_width)
+            _GI("grid_h_lines", grid_h_lines)
+            _GI("y_min",        y_min)
+            _GI("y_max",        y_max)
+            _GI("point_count",  point_count)
+            _GI("fill_opa",     fill_opa)
+#undef _GI
+
+#define _GC(key, field) \
+            if (json_obj_get_string(&jctx, key, gstr, sizeof(gstr)) == OS_SUCCESS) \
+                g_theme.graph.field = theme_color_from_str(gstr);
+            _GC("color",      color)
+            _GC("fill_color", fill_color)
+            _GC("grid_color", grid_color)
+#undef _GC
+
+            if (json_obj_get_int(&jctx, "color_by_value", &gint) == OS_SUCCESS)
+                g_theme.graph.color_by_value = (gint != 0);
+
+            int nth;
+            if (json_obj_get_array(&jctx, "thresholds", &nth) == OS_SUCCESS) {
+                int n = LV_MIN(nth, GRAPH_MAX_THRESHOLDS);
+                g_theme.graph.threshold_count = n;
+                for (int ti = 0; ti < n; ti++) {
+                    if (json_arr_get_object(&jctx, ti) == OS_SUCCESS) {
+                        if (json_obj_get_int(&jctx, "threshold", &gint) == OS_SUCCESS)
+                            g_theme.graph.thresholds[ti].threshold = gint;
+                        if (json_obj_get_string(&jctx, "color", gstr, sizeof(gstr)) == OS_SUCCESS)
+                            g_theme.graph.thresholds[ti].color = theme_color_from_str(gstr);
+                        json_arr_leave_object(&jctx);
+                    }
+                }
+                json_obj_leave_array(&jctx);
+            }
+
+            if (json_obj_get_int(&jctx, "sym_color_by_distance", &gint) == OS_SUCCESS)
+                g_theme.graph.sym_color_by_distance = (gint != 0);
+            if (json_obj_get_string(&jctx, "sym_center_color", gstr, sizeof(gstr)) == OS_SUCCESS)
+                g_theme.graph.sym_center_color = theme_color_from_str(gstr);
+            if (json_obj_get_string(&jctx, "sym_peak_color", gstr, sizeof(gstr)) == OS_SUCCESS)
+                g_theme.graph.sym_peak_color = theme_color_from_str(gstr);
+
+            json_obj_leave_object(&jctx);
+        }
+
+        if (json_obj_get_object(&jctx, "sparkline") == OS_SUCCESS) {
+            ws_parse(&jctx, &g_theme.ws_sparkline);
+            char sstr[16];
+            int sint;
+            if (json_obj_get_string(&jctx, "color", sstr, sizeof(sstr)) == OS_SUCCESS)
+                g_theme.sparkline.color = theme_color_from_str(sstr);
+            if (json_obj_get_int(&jctx, "line_width",   &sint) == OS_SUCCESS) g_theme.sparkline.line_width  = sint;
+            if (json_obj_get_int(&jctx, "y_min",        &sint) == OS_SUCCESS) g_theme.sparkline.y_min       = sint;
+            if (json_obj_get_int(&jctx, "y_max",        &sint) == OS_SUCCESS) g_theme.sparkline.y_max       = sint;
+            if (json_obj_get_int(&jctx, "point_count",  &sint) == OS_SUCCESS) g_theme.sparkline.point_count = sint;
             json_obj_leave_object(&jctx);
         }
 

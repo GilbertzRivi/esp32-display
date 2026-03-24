@@ -204,9 +204,6 @@ static void make_loading_screen(void)
     lv_obj_set_style_bg_color(scr, BOOT_BG, LV_PART_MAIN);
     lv_obj_set_style_bg_opa(scr, LV_OPA_COVER, LV_PART_MAIN);
 
-    /* gorna linia */
-    boot_hline(scr, 0, 0, 480, BOOT_ACCENT);
-
     /* ───────────────────────── header ───────────────────────── */
 
     lv_obj_t *header = boot_box(scr, 8, 8, 464, 30);
@@ -223,7 +220,7 @@ static void make_loading_screen(void)
              "STARTUP SEQUENCE",
              BOOT_TEXT, LV_TEXT_ALIGN_LEFT);
 
-    boot_lbl(header, 250, 6, 204, 10,
+    boot_lbl(header, 18, 16, 438, 10,
              "DISPLAY / TOUCH / NET / THEME / LAYOUT",
              BOOT_MUTED, LV_TEXT_ALIGN_RIGHT);
 
@@ -274,11 +271,9 @@ static void make_loading_screen(void)
 
     /* ───────────────────────── progress ───────────────────────── */
 
-    lv_obj_t *progress = boot_box(scr, 8, 296, 464, 16);
-
-    lv_obj_t *pbar = lv_bar_create(progress);
+    lv_obj_t *pbar = lv_bar_create(scr);
     lv_obj_set_size(pbar, 434, 8);
-    lv_obj_set_pos(pbar, 14, 4);
+    lv_obj_set_pos(pbar, 22, 300);
     lv_bar_set_range(pbar, 0, 100);
     lv_bar_set_value(pbar, 8, LV_ANIM_OFF);
 
@@ -293,9 +288,6 @@ static void make_loading_screen(void)
     lv_obj_set_style_radius(pbar, 0, LV_PART_INDICATOR);
 
     g_boot.progress_bar = pbar;
-
-    /* dolna linia */
-    boot_hline(scr, 0, 319, 480, BOOT_ACCENT);
 
     lv_scr_load(scr);
 }
@@ -424,6 +416,17 @@ void app_main(void)
         free(theme_json);
     }
     theme_build_styles();
+
+    static const lv_disp_rot_t rot_map[] = {
+        [0] = LV_DISP_ROT_NONE,
+        [1] = LV_DISP_ROT_90,
+        [2] = LV_DISP_ROT_180,
+        [3] = LV_DISP_ROT_270,
+    };
+    int rot_deg = theme_rotation();
+    lv_disp_rot_t rot = rot_map[(rot_deg / 90) % 4];
+    if (rot != LV_DISP_ROT_NONE)
+        lv_disp_set_rotation(lv_disp_get_default(), rot);
 
     lvgl_port_lock();
     loading_theme_ok();

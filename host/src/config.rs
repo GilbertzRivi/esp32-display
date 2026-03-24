@@ -33,10 +33,13 @@ pub struct ArtifactsConfig {
     pub layout: String,
     #[serde(default = "default_theme")]
     pub theme: String,
+    #[serde(default = "default_images_dir")]
+    pub images_dir: String,
 }
 
 fn default_layout() -> String { "layout.json".to_string() }
 fn default_theme() -> String { "theme.json".to_string() }
+fn default_images_dir() -> String { "images".to_string() }
 
 #[derive(Debug, Deserialize, Clone)]
 pub struct SourceConfig {
@@ -72,7 +75,7 @@ impl Default for Config {
     fn default() -> Self {
         Self {
             server: ServerConfig { host: default_host(), port: default_port() },
-            artifacts: ArtifactsConfig { layout: default_layout(), theme: default_theme() },
+            artifacts: ArtifactsConfig { layout: default_layout(), theme: default_theme(), images_dir: default_images_dir() },
             events: vec![],
             sources: vec![
                 SourceConfig {
@@ -110,6 +113,9 @@ pub fn load(path: &str) -> Config {
             eprintln!("config parse error: {e}, using defaults");
             Config::default()
         }),
-        Err(_) => Config::default(),
+        Err(e) => {
+            eprintln!("config read error: {e}, using defaults");
+            Config::default()
+        }
     }
 }

@@ -108,6 +108,8 @@ typedef struct {
 #define WS_SHADOW_WIDTH   (1u << 25)
 #define WS_OUTLINE_COLOR  (1u << 26)
 #define WS_OUTLINE_WIDTH  (1u << 27)
+#define WS_TEXT_ALIGN     (1u << 28)
+#define WS_FLEX_JUSTIFY   (1u << 29)
 
 typedef struct {
     uint32_t flags;
@@ -147,6 +149,9 @@ typedef struct {
 
     lv_color_t  outline_color;
     int16_t     outline_width;
+
+    lv_text_align_t text_align;   /* WS_TEXT_ALIGN */
+    lv_flex_align_t flex_justify; /* WS_FLEX_JUSTIFY — main axis only */
 } widget_style_t;
 
 /* ------------------------------------------------------------------ */
@@ -164,6 +169,8 @@ typedef struct {
     int spinner_speed_ms;
     int spinner_arc_deg;
     int container_gap;
+
+    int rotation;  /* 0 / 90 / 180 / 270 */
 
     graph_config_t     graph;
     sparkline_config_t sparkline;
@@ -207,6 +214,7 @@ int theme_spinner_speed_ms(void);
 int theme_spinner_arc_deg(void);
 int theme_container_gap(void);
 int theme_gauge_arc_width(int widget_min_dim);
+int theme_rotation(void);
 
 void theme_apply(lv_obj_t *obj, const char *widget_type);
 

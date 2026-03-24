@@ -11,10 +11,13 @@ pub struct Artifacts {
 
 impl Artifacts {
     pub fn load(layout_path: &str, theme_path: &str) -> Self {
-        let layout = std::fs::read_to_string(layout_path)
+        let layout_raw = std::fs::read_to_string(layout_path)
             .unwrap_or_else(|_| default_layout());
-        let theme = std::fs::read_to_string(theme_path)
+        let theme_raw = std::fs::read_to_string(theme_path)
             .unwrap_or_else(|_| default_theme());
+
+        let layout = minify_json_or_keep(&layout_raw, "layout");
+        let theme  = minify_json_or_keep(&theme_raw, "theme");
 
         Self {
             layout_json: Arc::new(RwLock::new(layout)),
@@ -28,6 +31,17 @@ impl Artifacts {
 
     pub fn get_theme(&self) -> String {
         self.theme_json.read().unwrap().clone()
+    }
+
+    pub fn reload(&self, layout_path: &str, theme_path: &str) {
+        if let Ok(content) = std::fs::read_to_string(layout_path) {
+            *self.layout_json.write().unwrap() = minify_json_or_keep(&content, "layout");
+            tracing::info!("reloaded layout.json");
+        }
+        if let Ok(content) = std::fs::read_to_string(theme_path) {
+            *self.theme_json.write().unwrap() = minify_json_or_keep(&content, "theme");
+            tracing::info!("reloaded theme.json");
+        }
     }
 
     pub fn start_watcher(&self, layout_path: String, theme_path: String) {
@@ -60,12 +74,14 @@ impl Artifacts {
                         for path in event.paths {
                             if path == layout_pb {
                                 if let Ok(content) = std::fs::read_to_string(&layout_path) {
-                                    *layout_json.write().unwrap() = content;
+                                    *layout_json.write().unwrap() =
+                                        minify_json_or_keep(&content, "layout");
                                     tracing::info!("hot-reloaded layout.json");
                                 }
                             } else if path == theme_pb {
                                 if let Ok(content) = std::fs::read_to_string(&theme_path) {
-                                    *theme_json.write().unwrap() = content;
+                                    *theme_json.write().unwrap() =
+                                        minify_json_or_keep(&content, "theme");
                                     tracing::info!("hot-reloaded theme.json");
                                 }
                             }
@@ -76,6 +92,19 @@ impl Artifacts {
                 }
             }
         });
+    }
+}
+
+fn minify_json_or_keep(input: &str, label: &str) -> String {
+    match serde_json::from_str::<serde_json::Value>(input) {
+        Ok(v) => serde_json::to_string(&v).unwrap_or_else(|e| {
+            tracing::warn!("failed to serialize minified {label} json: {e}");
+            input.to_string()
+        }),
+        Err(e) => {
+            tracing::warn!("failed to parse {label} json for minify: {e}");
+            input.to_string()
+        }
     }
 }
 

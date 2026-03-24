@@ -19,6 +19,7 @@ typedef enum {
  */
 lv_obj_t *w_graph_create(lv_obj_t *parent, int x, int y, int w, int h,
                           const graph_config_t *cfg);
+void w_graph_set_color(lv_obj_t *obj, lv_color_t color);
 void w_graph_set_range(lv_obj_t *obj, int min, int max);
 void w_graph_push(lv_obj_t *obj, float value);
 void w_graph_set_field(lv_obj_t *obj, int field_id, const char *val);

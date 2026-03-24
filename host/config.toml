@@ -1,222 +1,266 @@
+# =============================================================================
+# host/config.toml — konfiguracja hosta esp32-display
+# =============================================================================
+
+# -----------------------------------------------------------------------------
+# [server] — adres i port serwera HTTP/WebSocket
+# -----------------------------------------------------------------------------
 [server]
-host = "0.0.0.0"
+host = "0.0.0.0"   # adres nasłuchu; "0.0.0.0" = wszystkie interfejsy
 port = 1234
 
+# -----------------------------------------------------------------------------
+# [artifacts] — pliki serwowane jako /layout i /theme
+# -----------------------------------------------------------------------------
 [artifacts]
-layout = "layout1.json"
-theme = "theme1.json"
+layout     = "layout.json"
+theme      = "theme.json"
+images_dir = "/home/gilbert/Documents/esp32-display/host/images/"
 
-# ------------------------------------------------------------------
-# BUILTIN
-# ------------------------------------------------------------------
+# =============================================================================
+# [[sources]] — źródła danych dla placeholderów
+#
+# Każdy wpis [[sources]] definiuje jedno źródło i deklaruje placeholder(y)
+# które aktualizuje. Device używa tych samych nazw w layout JSON jako "$nazwa".
+#
+# Wspólne pola:
+#   placeholder   — nazwa klucza wysyłanego przez WebSocket (bez "$")
+#   kind          — "builtin" (wbudowane) lub "command" (zewnętrzny proces)
+#   interval_ms   — co ile ms odpytywać / jak często emitować dane
+#
+# Dla kind = "builtin":
+#   metric        — nazwa metryki (patrz tabela poniżej)
+#
+# Dla kind = "command":
+#   command       — polecenie sh -c "..."
+#   mode          — "shot" | "push" | "pull"  (domyślnie: "shot")
+#     shot  — uruchamia co interval_ms, czyta jeden wiersz stdout
+#     push  — długo żyjący proces; każdy wiersz stdout = update (interval_ms ignorowane)
+#     pull  — długo żyjący proces; co interval_ms zapisuje "\n" na stdin, czyta jeden wiersz stdout
+#
+# Jeśli stdout to JSON obiekt ({ "klucz": wartość, ... }), każdy klucz w obiekcie
+# trafia jako osobny placeholder — "placeholder" nie ma wtedy znaczenia (ale musi być podane).
+# Jeśli stdout to zwykły string, trafia pod "placeholder".
+# =============================================================================
 
+# =============================================================================
+# BUILTIN — METRYKI CPU
+# =============================================================================
+
+# Globalne użycie CPU w % (0–100, bez miejsc dziesiętnych)
 [[sources]]
-placeholder = "cpu_usage"
-kind = "builtin"
-metric = "cpu_percent"
-interval_ms = 1000
+placeholder  = "cpu_usage"
+kind         = "builtin"
+metric       = "cpu_percent"
+interval_ms  = 1000
 
+# Użycie pojedynczego rdzenia (0 = pierwszy rdzeń, 1 = drugi, itd.)
+# Odkomentuj i powiel dla każdego rdzenia który chcesz pokazać.
+# [[sources]]
+# placeholder  = "cpu0_usage"
+# kind         = "builtin"
+# metric       = "cpu_0_percent"
+# interval_ms  = 1000
+
+# [[sources]]
+# placeholder  = "cpu1_usage"
+# kind         = "builtin"
+# metric       = "cpu_1_percent"
+# interval_ms  = 1000
+
+# Temperatura CPU w °C (liczba całkowita)
+# Linux: czyta lm-sensors (Tctl/Tdie/Package). Windows: nie obsługiwane (zwraca 0).
 [[sources]]
-placeholder = "ram_percent"
-kind = "builtin"
-metric = "ram_percent"
-interval_ms = 2000
+placeholder  = "cpu_temp_c"
+kind         = "builtin"
+metric       = "cpu_temp_c"
+interval_ms  = 2000
 
+# =============================================================================
+# BUILTIN — METRYKI RAM
+# =============================================================================
+
+# Użycie RAM w % (0–100, bez miejsc dziesiętnych)
 [[sources]]
-placeholder = "ram_used"
-kind = "builtin"
-metric = "ram_used_gb"
-interval_ms = 2000
+placeholder  = "ram_percent"
+kind         = "builtin"
+metric       = "ram_percent"
+interval_ms  = 2000
 
+# Użyta pamięć RAM w GB (np. "7.3")
 [[sources]]
-placeholder = "disk_percent"
-kind = "builtin"
-metric = "disk_percent"
-interval_ms = 5000
+placeholder  = "ram_used"
+kind         = "builtin"
+metric       = "ram_used_gb"
+interval_ms  = 2000
 
+# Całkowita pamięć RAM w GB (np. "16.0") — zazwyczaj stała, duży interval OK
+# [[sources]]
+# placeholder  = "ram_total"
+# kind         = "builtin"
+# metric       = "ram_total_gb"
+# interval_ms  = 60000
+
+# =============================================================================
+# BUILTIN — METRYKI DYSKU
+# =============================================================================
+
+# Użycie dysku systemowego w % (partycja / na Linux, C:\ na Windows)
 [[sources]]
-placeholder = "disk_used"
-kind = "builtin"
-metric = "disk_used_gb"
-interval_ms = 5000
+placeholder  = "disk_percent"
+kind         = "builtin"
+metric       = "disk_percent"
+interval_ms  = 5000
 
-# ------------------------------------------------------------------
-# SIMPLE TEXT VALUES
-# ------------------------------------------------------------------
-
+# Użyte miejsce na dysku systemowym w GB (np. "142.7")
 [[sources]]
-placeholder = "host_name"
-kind = "command"
-mode = "shot"
-command = "hostname"
-interval_ms = 60000
+placeholder  = "disk_used"
+kind         = "builtin"
+metric       = "disk_used_gb"
+interval_ms  = 5000
 
+# =============================================================================
+# BUILTIN — SYSTEM
+# =============================================================================
+
+# Hostname maszyny (np. "gilbert-desktop")
 [[sources]]
-placeholder = "kernel_short"
-kind = "command"
-mode = "shot"
-command = "uname -r | cut -c1-12"
-interval_ms = 60000
+placeholder  = "host_name"
+kind         = "builtin"
+metric       = "hostname"
+interval_ms  = 60000
 
+# Skrócona wersja kernela, max 12 znaków
+# Linux: np. "6.18.7-x64v3". Windows: np. "Windows 11"
 [[sources]]
-placeholder = "uptime_fmt"
-kind = "command"
-mode = "shot"
-command = '''awk '{ s=$1; d=int(s/86400); h=int((s%86400)/3600); m=int((s%3600)/60); if (d>0) printf "%dd %02dh %02dm", d, h, m; else printf "%dh %02dm", h, m }' /proc/uptime'''
-interval_ms = 10000
+placeholder  = "kernel_short"
+kind         = "builtin"
+metric       = "kernel_short"
+interval_ms  = 60000
 
-# ------------------------------------------------------------------
-# CPU TEMP FROM ZENPOWER (via sensors)
-# ------------------------------------------------------------------
+# Czas pracy systemu w sekundach (liczba całkowita jako string)
+# [[sources]]
+# placeholder  = "uptime_s"
+# kind         = "builtin"
+# metric       = "uptime_s"
+# interval_ms  = 10000
 
+# Czas pracy systemu w formacie czytelnym (np. "2d 03h 14m" albo "5h 09m")
 [[sources]]
-placeholder = "cpu_temp_c"
-kind = "command"
-mode = "shot"
-command = '''
-v=$(
-  sensors 2>/dev/null | awk '
-    BEGIN { z=0 }
-    /zenpower/ { z=1 }
-    z && /Tctl:|Tdie:/ {
-      line=$0
-      gsub(/[^0-9.+-]/, " ", line)
-      n=split(line, a, / +/)
-      for (i=1; i<=n; i++) {
-        if (a[i] ~ /^[-+]?[0-9]+([.][0-9]+)?$/) {
-          print int(a[i])
-          exit
-        }
-      }
-    }
-  '
-)
-[ -n "$v" ] && printf "%s" "$v" || printf "0"
-'''
-interval_ms = 2000
+placeholder  = "uptime_fmt"
+kind         = "builtin"
+metric       = "uptime_fmt"
+interval_ms  = 10000
 
-# ------------------------------------------------------------------
-# GPU DATA FROM AMDGPU
-# updates: gpu_usage, gpu_temp_c, gpu_mem_used
-# ------------------------------------------------------------------
-
+# =============================================================================
+# BUILTIN — GPU (emituje JSON → wiele placeholderów naraz)
+#
+# Wykrywanie: NVIDIA przez NVML (Linux + Windows), AMD przez sysfs (Linux),
+# AMD/Intel przez PDH + DXGI (Windows). Jeśli GPU nie wykryty — zwraca zera.
+#
+# Placeholder "gpu_usage" jest wpisem wyzwalającym; reszta pochodzi z JSON.
+# Wszystkie poniższe placeholdery są aktualizowane tym samym wpisem [[sources]].
+#
+# Dostępne placeholdery:
+#   gpu_usage     — użycie GPU w %  (np. "64")
+#   gpu_temp_c    — temperatura GPU w °C (np. "71"); Windows bez NVML zwraca "N/A"
+#   gpu_mem_used  — zajęta VRAM w GB (np. "4.2G")
+# =============================================================================
 [[sources]]
-placeholder = "gpu_usage"
-kind = "command"
-mode = "shot"
-command = '''
-c=$(grep -l "DRIVER=amdgpu" /sys/class/drm/card*/device/uevent 2>/dev/null | head -n1)
-c=${c%/device/uevent}
-[ -n "$c" ] || c="/sys/class/drm/card0"
+placeholder  = "gpu_usage"
+kind         = "builtin"
+metric       = "gpu_stats"
+interval_ms  = 2000
 
-gpu_usage=$(cat "$c/device/gpu_busy_percent" 2>/dev/null)
-[ -n "$gpu_usage" ] || gpu_usage=0
-
-gpu_temp_raw=$(cat "$c"/device/hwmon/hwmon*/temp1_input 2>/dev/null | head -n1)
-[ -n "$gpu_temp_raw" ] || gpu_temp_raw=0
-gpu_temp_c=$((gpu_temp_raw / 1000))
-
-gpu_mem_raw=$(cat "$c/device/mem_info_vram_used" 2>/dev/null)
-[ -n "$gpu_mem_raw" ] || gpu_mem_raw=0
-gpu_mem_used=$(awk -v n="$gpu_mem_raw" 'BEGIN { printf "%.1fG", n/1024/1024/1024 }')
-
-printf '{"gpu_usage":"%s","gpu_temp_c":"%s","gpu_mem_used":"%s"}' \
-  "$gpu_usage" "$gpu_temp_c" "$gpu_mem_used"
-'''
-interval_ms = 2000
-
-# ------------------------------------------------------------------
-# NETWORK DATA
-# Superset of both configs:
-# net_ip, net_rx, net_tx,
-# net_iface, net_gateway, net_state, net_link,
-# net_rx_bps, net_tx_bps, net_link_bps,
-# net_rx_pct, net_tx_pct,
-# net_graph_scale
-# ------------------------------------------------------------------
-
+# =============================================================================
+# BUILTIN — SIEĆ (emituje JSON → wiele placeholderów naraz)
+#
+# Automatycznie wykrywa interfejs z domyślną trasą (ten który "wychodzi" do sieci).
+# Dwa pomiary w odstępie 1s → prędkości jako delta bytes/s.
+# Linux: czyta sysfs dla speed/gateway/operstate. Windows: używa wartości domyślnych.
+#
+# Placeholder "net_ip" jest wpisem wyzwalającym; reszta pochodzi z JSON.
+# Wszystkie poniższe placeholdery są aktualizowane tym samym wpisem [[sources]].
+#
+# Dostępne placeholdery:
+#   net_ip         — lokalny adres IPv4 (np. "192.168.1.42")
+#   net_iface      — nazwa interfejsu (np. "eth0", "wlan0")
+#   net_gateway    — adres bramy domyślnej (np. "192.168.1.1"); "-" jeśli nieznany
+#   net_state      — operstate interfejsu (np. "up", "down"); Linux only
+#   net_link       — prędkość łącza (np. "1G", "100M"); Windows default = "1G"
+#   net_rx         — prędkość odbioru w formacie czytelnym (np. "1.2 MB/s")
+#   net_tx         — prędkość wysyłania w formacie czytelnym (np. "456 KB/s")
+#   net_rx_bps     — prędkość odbioru raw w bajtach/s (np. "1258291")
+#   net_tx_bps     — prędkość wysyłania raw w bajtach/s (np. "467000")
+#   net_link_bps   — pojemność łącza w bajtach/s (np. "125000000" dla 1G)
+#   net_rx_pct     — % łącza zajęty przez RX (0–100)
+#   net_tx_pct     — % łącza zajęty przez TX (0–100)
+#   net_graph_scale — etykieta skali dla grafu (taka sama jak net_link, np. "1G")
+# =============================================================================
 [[sources]]
-placeholder = "net_ip"
-kind = "command"
-mode = "shot"
-command = '''
-iface=$(ip route get 1.1.1.1 2>/dev/null | awk '/dev/ { for (i=1; i<=NF; i++) if ($i=="dev") { print $(i+1); exit } }')
-[ -n "$iface" ] || iface=$(ls /sys/class/net 2>/dev/null | awk '$1 != "lo" { print; exit }')
-[ -n "$iface" ] || iface="lo"
+placeholder  = "net_ip"
+kind         = "builtin"
+metric       = "net_stats"
+interval_ms  = 2000
 
-ip4=$(ip -4 addr show dev "$iface" 2>/dev/null | awk '/inet / {print $2; exit}' | cut -d/ -f1)
-[ -n "$ip4" ] || ip4=$(hostname -I 2>/dev/null | awk '{ print $1 }')
-[ -n "$ip4" ] || ip4="0.0.0.0"
+# =============================================================================
+# COMMAND — niestandardowe źródła danych
+# =============================================================================
 
-gw=$(ip route show default 2>/dev/null | awk -v dev="$iface" '$1=="default" && $0 ~ ("dev " dev) {print $3; exit}')
-[ -n "$gw" ] || gw="-"
+# Przykład: shot — wykonywane co interval_ms, jeden wiersz stdout
+# [[sources]]
+# placeholder  = "my_value"
+# kind         = "command"
+# mode         = "shot"
+# command      = "sensors -j | jq -r '.[][\"Package id 0\"][\"temp1_input\"]'"
+# interval_ms  = 3000
 
-state=$(cat "/sys/class/net/$iface/operstate" 2>/dev/null)
-[ -n "$state" ] || state="unknown"
+# Przykład: push — długo żyjący proces streamujący dane (np. co sekundę)
+# [[sources]]
+# placeholder  = "stream_value"
+# kind         = "command"
+# mode         = "push"
+# command      = "while true; do date +%s; sleep 1; done"
 
-# speed z /sys zwykle jest w Mb/s; fallback 1000
-speed_mbps=$(cat "/sys/class/net/$iface/speed" 2>/dev/null)
-case "$speed_mbps" in
-  ''|*[!0-9]*|-1) speed_mbps=1000 ;;
-esac
+# Przykład: pull — interaktywny daemon (host pisze "\n", daemon odpowiada jedną linią)
+# [[sources]]
+# placeholder  = "daemon_value"
+# kind         = "command"
+# mode         = "pull"
+# command      = "/usr/local/bin/my-daemon"
+# interval_ms  = 500
 
-# bytes/s dla barów i truthful graph scale
-link_bps=$((speed_mbps * 125000))
+# Przykład: command emitujący JSON — aktualizuje wiele placeholderów naraz
+# [[sources]]
+# placeholder  = "_json"           # ignorowane gdy stdout to JSON obiekt
+# kind         = "command"
+# mode         = "shot"
+# command      = "echo '{\"temp_gpu\":\"72\",\"fan_rpm\":\"1800\"}'"
+# interval_ms  = 2000
 
-fmt_link() {
-  s="$1"
-  if [ "$s" -ge 1000 ] 2>/dev/null; then
-    awk -v n="$s" 'BEGIN {
-      g=n/1000;
-      if (g == int(g)) printf "%dG", g;
-      else printf "%.1fG", g;
-    }'
-  else
-    printf "%sM" "$s"
-  fi
-}
+# =============================================================================
+# [[events]] — reakcje na eventy WebSocket z urządzenia
+#
+# Device wysyła {"event": "namespace.akcja"} gdy użytkownik dotknie widgetu
+# z on_tap = "reply.namespace.akcja". Pasujący event uruchamia command.
+#
+# Pola:
+#   event    — nazwa eventu (np. "spotify.next", "media.play")
+#   command  — polecenie sh -c "..." do wykonania
+# =============================================================================
 
-fmt_rate() {
-  v="$1"
-  if [ "$v" -ge 1073741824 ] 2>/dev/null; then
-    awk -v n="$v" 'BEGIN { printf "%.2f GB/s", n/1073741824 }'
-  elif [ "$v" -ge 1048576 ] 2>/dev/null; then
-    awk -v n="$v" 'BEGIN { printf "%.1f MB/s", n/1048576 }'
-  elif [ "$v" -ge 1024 ] 2>/dev/null; then
-    awk -v n="$v" 'BEGIN { printf "%.0f KB/s", n/1024 }'
-  else
-    printf "%s B/s" "$v"
-  fi
-}
+# [[events]]
+# event   = "spotify.next"
+# command = "playerctl next"
 
-rx1=$(cat "/sys/class/net/$iface/statistics/rx_bytes" 2>/dev/null || printf "0")
-tx1=$(cat "/sys/class/net/$iface/statistics/tx_bytes" 2>/dev/null || printf "0")
-sleep 1
-rx2=$(cat "/sys/class/net/$iface/statistics/rx_bytes" 2>/dev/null || printf "0")
-tx2=$(cat "/sys/class/net/$iface/statistics/tx_bytes" 2>/dev/null || printf "0")
+# [[events]]
+# event   = "spotify.prev"
+# command = "playerctl previous"
 
-rx=$((rx2 - rx1))
-tx=$((tx2 - tx1))
-[ "$rx" -lt 0 ] && rx=0
-[ "$tx" -lt 0 ] && tx=0
+# [[events]]
+# event   = "spotify.toggle"
+# command = "playerctl play-pause"
 
-# truthful 0..100 względem realnego linku
-if [ "$link_bps" -le 0 ] 2>/dev/null; then
-  rx_pct=0
-  tx_pct=0
-else
-  rx_pct=$((rx * 100 / link_bps))
-  tx_pct=$((tx * 100 / link_bps))
-fi
-
-[ "$rx_pct" -lt 0 ] && rx_pct=0
-[ "$tx_pct" -lt 0 ] && tx_pct=0
-[ "$rx_pct" -gt 100 ] && rx_pct=100
-[ "$tx_pct" -gt 100 ] && tx_pct=100
-
-link_label=$(fmt_link "$speed_mbps")
-
-printf '{"net_ip":"%s","net_rx":"%s","net_tx":"%s","net_iface":"%s","net_gateway":"%s","net_state":"%s","net_link":"%s","net_rx_bps":"%s","net_tx_bps":"%s","net_link_bps":"%s","net_rx_pct":"%s","net_tx_pct":"%s","net_graph_scale":"%s"}' \
-  "$ip4" "$(fmt_rate "$rx")" "$(fmt_rate "$tx")" "$iface" "$gw" "$state" "$link_label" "$rx" "$tx" "$link_bps" "$rx_pct" "$tx_pct" "$link_label"
-'''
-interval_ms = 2000
+# [[events]]
+# event   = "system.reboot"
+# command = "systemctl reboot"

@@ -1,0 +1,122 @@
+{
+  "palette": {
+    "bg": "#071019",
+    "fg": "#eaf6ff",
+    "accent": "#5eead4",
+    "accent2": "#7cc7ff",
+    "dim": "#163447",
+    "dim2": "#285f71",
+    "soft": "#9fe3dc",
+    "danger": "#ff6b6b"
+  },
+  "font": "montserrat_12",
+  "rotation": 0,
+  "widgets": {
+    "screen": {
+      "bg_color": "bg",
+      "bg_opa": 255
+    },
+    "label": {
+      "text_color": "fg",
+      "bg_opa": 0
+    },
+    "button": {
+      "font": "montserrat_12",
+      "bg_color": "dim",
+      "bg_opa": 224,
+      "border_width": 1,
+      "border_color": "accent",
+      "border_opa": 255,
+      "radius": 10,
+      "pad_top": 3,
+      "pad_bottom": 3,
+      "pad_left": 6,
+      "pad_right": 6,
+      "text_color": "fg",
+      "pressed_bg": "accent",
+      "pressed_text": "bg"
+    },
+    "icon": {
+      "text_color": "accent",
+      "font": "unscii_16",
+      "text_align": "center"
+    },
+    "ticker": {
+      "text_color": "accent",
+      "font": "montserrat_12"
+    },
+    "container": {
+      "bg_opa": 0,
+      "border_width": 0,
+      "radius": 0,
+      "pad_gap": 0,
+      "justify": "start"
+    },
+    "sparkline": {
+      "color": "accent",
+      "line_width": 1,
+      "y_min": 0,
+      "y_max": 100,
+      "point_count": 40
+    },
+    "bar": {
+      "bg_color": "dim",
+      "bg_opa": 190,
+      "border_width": 1,
+      "border_color": "accent",
+      "radius": 6,
+      "indicator": {
+        "fill_color": "accent",
+        "fill_opa": 255,
+        "radius": 6
+      }
+    },
+    "gauge": {
+      "bg_opa": 0,
+      "arc_color": "dim",
+      "arc_width": 8,
+      "text_color": "fg",
+      "indicator": {
+        "fill_color": "accent",
+        "fill_opa": 255
+      }
+    },
+    "spinner": {
+      "arc_color": "dim",
+      "arc_width": 4,
+      "indicator": {
+        "fill_color": "accent",
+        "fill_opa": 255
+      }
+    },
+    "toggle": {
+      "bg_color": "dim",
+      "bg_opa": 220,
+      "border_width": 1,
+      "border_color": "accent",
+      "radius": 12,
+      "checked": {
+        "bg_color": "accent",
+        "border_color": "accent",
+        "text_color": "bg"
+      }
+    },
+    "graph": {
+      "style": "line",
+      "line_width": 2,
+      "color": "accent",
+      "fill_color": "accent",
+      "fill_opa": 48,
+      "grid_h_lines": 2,
+      "grid_color": "dim",
+      "y_min": 0,
+      "y_max": 100,
+      "point_count": 40,
+      "bg_color": "bg",
+      "bg_opa": 64,
+      "border_width": 1,
+      "border_color": "dim",
+      "radius": 10
+    }
+  }
+}

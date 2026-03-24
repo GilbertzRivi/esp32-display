@@ -1,0 +1,2063 @@
+{
+  "screens": [
+    {
+      "id": "main",
+      "widgets": [
+        {
+          "type": "container",
+          "layout": "absolute",
+          "x": 0,
+          "y": 0,
+          "w": 480,
+          "h": 320,
+          "bg_image": "wallpaper_grid",
+          "style": {
+            "bg_color": "#071019",
+            "bg_opa": 216
+          },
+          "children": []
+        },
+        {
+          "type": "container",
+          "layout": "absolute",
+          "x": 12,
+          "y": 10,
+          "w": 456,
+          "h": 42,
+          "style": {
+            "bg_color": "#0b1b26",
+            "bg_opa": 208,
+            "border_width": 1,
+            "border_color": "#285f71",
+            "radius": 14
+          },
+          "children": []
+        },
+        {
+          "type": "label",
+          "x": 24,
+          "y": 20,
+          "w": 48,
+          "h": 16,
+          "style": {
+            "font": "unscii_16",
+            "text_color": "#5eead4"
+          },
+          "bind": {
+            "text": "SYS"
+          }
+        },
+        {
+          "type": "label",
+          "x": 78,
+          "y": 20,
+          "w": 170,
+          "h": 14,
+          "style": {
+            "text_color": "#f4fffe"
+          },
+          "bind": {
+            "text": "$host_name"
+          }
+        },
+        {
+          "type": "label",
+          "x": 78,
+          "y": 34,
+          "w": 104,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "$kernel_short"
+          }
+        },
+        {
+          "type": "label",
+          "x": 188,
+          "y": 34,
+          "w": 84,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "$uptime_fmt"
+          }
+        },
+        {
+          "type": "button",
+          "x": 284,
+          "y": 18,
+          "w": 56,
+          "h": 22,
+          "style": {
+            "text_align": "center",
+            "bg_color": "#5eead4",
+            "text_color": "#071019",
+            "border_color": "#5eead4",
+            "outline_color": "#c4fff7",
+            "outline_width": 1
+          },
+          "bind": {
+            "label": "MAIN"
+          },
+          "on_tap": "screen.main"
+        },
+        {
+          "type": "button",
+          "x": 344,
+          "y": 18,
+          "w": 56,
+          "h": 22,
+          "style": {
+            "text_align": "center"
+          },
+          "bind": {
+            "label": "GRAPHS"
+          },
+          "on_tap": "screen.graphs"
+        },
+        {
+          "type": "button",
+          "x": 404,
+          "y": 18,
+          "w": 56,
+          "h": 22,
+          "style": {
+            "text_align": "center"
+          },
+          "bind": {
+            "label": "INFO"
+          },
+          "on_tap": "screen.info"
+        },
+        {
+          "type": "container",
+          "layout": "absolute",
+          "x": 12,
+          "y": 60,
+          "w": 220,
+          "h": 116,
+          "style": {
+            "bg_color": "#0d1d28",
+            "bg_opa": 224,
+            "border_width": 1,
+            "border_color": "#285f71",
+            "radius": 16
+          },
+          "children": []
+        },
+        {
+          "type": "label",
+          "x": 28,
+          "y": 72,
+          "w": 48,
+          "h": 16,
+          "style": {
+            "font": "unscii_16",
+            "text_color": "#5eead4"
+          },
+          "bind": {
+            "text": "CPU"
+          }
+        },
+        {
+          "type": "image",
+          "x": 28,
+          "y": 96,
+          "w": 48,
+          "h": 48,
+          "src": "chip_cpu"
+        },
+        {
+          "type": "label",
+          "x": 96,
+          "y": 102,
+          "w": 42,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "LOAD"
+          }
+        },
+        {
+          "type": "label",
+          "x": 154,
+          "y": 102,
+          "w": 24,
+          "h": 14,
+          "style": {
+            "text_color": "#f6fffe",
+            "text_align": "right"
+          },
+          "bind": {
+            "text": "$cpu_usage"
+          }
+        },
+        {
+          "type": "label",
+          "x": 182,
+          "y": 102,
+          "w": 10,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "%"
+          }
+        },
+        {
+          "type": "label",
+          "x": 96,
+          "y": 122,
+          "w": 42,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "TEMP"
+          }
+        },
+        {
+          "type": "label",
+          "x": 154,
+          "y": 122,
+          "w": 24,
+          "h": 12,
+          "style": {
+            "text_color": "#f6fffe",
+            "text_align": "right"
+          },
+          "bind": {
+            "text": "$cpu_temp_c"
+          }
+        },
+        {
+          "type": "label",
+          "x": 182,
+          "y": 122,
+          "w": 10,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "C"
+          }
+        },
+        {
+          "type": "bar",
+          "x": 96,
+          "y": 140,
+          "w": 108,
+          "h": 12,
+          "bind": {
+            "value": "$cpu_usage"
+          }
+        },
+        {
+          "type": "label",
+          "x": 28,
+          "y": 156,
+          "w": 30,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "RAM"
+          }
+        },
+        {
+          "type": "label",
+          "x": 74,
+          "y": 156,
+          "w": 44,
+          "h": 12,
+          "style": {
+            "text_color": "#f6fffe",
+            "text_align": "right"
+          },
+          "bind": {
+            "text": "$ram_used"
+          }
+        },
+        {
+          "type": "label",
+          "x": 124,
+          "y": 156,
+          "w": 14,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "GB"
+          }
+        },
+        {
+          "type": "label",
+          "x": 182,
+          "y": 156,
+          "w": 22,
+          "h": 12,
+          "style": {
+            "text_color": "#f6fffe",
+            "text_align": "right"
+          },
+          "bind": {
+            "text": "$ram_percent"
+          }
+        },
+        {
+          "type": "label",
+          "x": 206,
+          "y": 156,
+          "w": 10,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "%"
+          }
+        },
+        {
+          "type": "container",
+          "layout": "absolute",
+          "x": 248,
+          "y": 60,
+          "w": 220,
+          "h": 116,
+          "style": {
+            "bg_color": "#0d1d28",
+            "bg_opa": 224,
+            "border_width": 1,
+            "border_color": "#285f71",
+            "radius": 16
+          },
+          "children": []
+        },
+        {
+          "type": "label",
+          "x": 264,
+          "y": 72,
+          "w": 48,
+          "h": 16,
+          "style": {
+            "font": "unscii_16",
+            "text_color": "#5eead4"
+          },
+          "bind": {
+            "text": "GPU"
+          }
+        },
+        {
+          "type": "image",
+          "x": 264,
+          "y": 96,
+          "w": 48,
+          "h": 48,
+          "src": "chip_gpu"
+        },
+        {
+          "type": "label",
+          "x": 332,
+          "y": 102,
+          "w": 42,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "LOAD"
+          }
+        },
+        {
+          "type": "label",
+          "x": 390,
+          "y": 102,
+          "w": 24,
+          "h": 14,
+          "style": {
+            "text_color": "#f6fffe",
+            "text_align": "right"
+          },
+          "bind": {
+            "text": "$gpu_usage"
+          }
+        },
+        {
+          "type": "label",
+          "x": 418,
+          "y": 102,
+          "w": 10,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "%"
+          }
+        },
+        {
+          "type": "label",
+          "x": 332,
+          "y": 122,
+          "w": 42,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "TEMP"
+          }
+        },
+        {
+          "type": "label",
+          "x": 390,
+          "y": 122,
+          "w": 24,
+          "h": 12,
+          "style": {
+            "text_color": "#f6fffe",
+            "text_align": "right"
+          },
+          "bind": {
+            "text": "$gpu_temp_c"
+          }
+        },
+        {
+          "type": "label",
+          "x": 418,
+          "y": 122,
+          "w": 10,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "C"
+          }
+        },
+        {
+          "type": "bar",
+          "x": 332,
+          "y": 140,
+          "w": 108,
+          "h": 12,
+          "bind": {
+            "value": "$gpu_usage"
+          },
+          "style": {
+            "indicator": {
+              "fill_color": "#7cc7ff"
+            }
+          }
+        },
+        {
+          "type": "label",
+          "x": 264,
+          "y": 156,
+          "w": 38,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "VRAM"
+          }
+        },
+        {
+          "type": "label",
+          "x": 306,
+          "y": 156,
+          "w": 48,
+          "h": 12,
+          "style": {
+            "text_color": "#f6fffe"
+          },
+          "bind": {
+            "text": "$gpu_mem_used"
+          }
+        },
+        {
+          "type": "label",
+          "x": 382,
+          "y": 156,
+          "w": 34,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "LOAD"
+          }
+        },
+        {
+          "type": "label",
+          "x": 418,
+          "y": 156,
+          "w": 22,
+          "h": 12,
+          "style": {
+            "text_color": "#f6fffe",
+            "text_align": "right"
+          },
+          "bind": {
+            "text": "$gpu_usage"
+          }
+        },
+        {
+          "type": "label",
+          "x": 442,
+          "y": 156,
+          "w": 10,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "%"
+          }
+        },
+        {
+          "type": "container",
+          "layout": "absolute",
+          "x": 12,
+          "y": 184,
+          "w": 456,
+          "h": 124,
+          "style": {
+            "bg_color": "#0d1d28",
+            "bg_opa": 224,
+            "border_width": 1,
+            "border_color": "#285f71",
+            "radius": 16
+          },
+          "children": []
+        },
+        {
+          "type": "label",
+          "x": 28,
+          "y": 196,
+          "w": 110,
+          "h": 16,
+          "style": {
+            "font": "unscii_16",
+            "text_color": "#5eead4"
+          },
+          "bind": {
+            "text": "NETWORK"
+          }
+        },
+        {
+          "type": "label",
+          "x": 28,
+          "y": 220,
+          "w": 14,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "IP"
+          }
+        },
+        {
+          "type": "label",
+          "x": 52,
+          "y": 220,
+          "w": 118,
+          "h": 12,
+          "style": {
+            "text_color": "#f6fffe"
+          },
+          "bind": {
+            "text": "$net_ip"
+          }
+        },
+        {
+          "type": "label",
+          "x": 184,
+          "y": 220,
+          "w": 42,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "IFACE"
+          }
+        },
+        {
+          "type": "label",
+          "x": 232,
+          "y": 220,
+          "w": 84,
+          "h": 12,
+          "style": {
+            "text_color": "#f6fffe"
+          },
+          "bind": {
+            "text": "$net_iface"
+          }
+        },
+        {
+          "type": "label",
+          "x": 326,
+          "y": 220,
+          "w": 30,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "LINK"
+          }
+        },
+        {
+          "type": "label",
+          "x": 362,
+          "y": 220,
+          "w": 34,
+          "h": 12,
+          "style": {
+            "text_color": "#f6fffe"
+          },
+          "bind": {
+            "text": "$net_link"
+          }
+        },
+        {
+          "type": "label",
+          "x": 402,
+          "y": 220,
+          "w": 40,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "STATE"
+          }
+        },
+        {
+          "type": "label",
+          "x": 444,
+          "y": 220,
+          "w": 12,
+          "h": 12,
+          "style": {
+            "text_color": "#f6fffe"
+          },
+          "bind": {
+            "text": "$net_state"
+          }
+        },
+        {
+          "type": "label",
+          "x": 28,
+          "y": 240,
+          "w": 22,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "GW"
+          }
+        },
+        {
+          "type": "label",
+          "x": 52,
+          "y": 240,
+          "w": 150,
+          "h": 12,
+          "style": {
+            "text_color": "#f6fffe"
+          },
+          "bind": {
+            "text": "$net_gateway"
+          }
+        },
+        {
+          "type": "label",
+          "x": 28,
+          "y": 262,
+          "w": 20,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "RX"
+          }
+        },
+        {
+          "type": "label",
+          "x": 52,
+          "y": 262,
+          "w": 84,
+          "h": 12,
+          "style": {
+            "text_color": "#f6fffe"
+          },
+          "bind": {
+            "text": "$net_rx"
+          }
+        },
+        {
+          "type": "label",
+          "x": 150,
+          "y": 262,
+          "w": 24,
+          "h": 12,
+          "style": {
+            "text_color": "#f6fffe",
+            "text_align": "right"
+          },
+          "bind": {
+            "text": "$net_rx_pct"
+          }
+        },
+        {
+          "type": "label",
+          "x": 176,
+          "y": 262,
+          "w": 10,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "%"
+          }
+        },
+        {
+          "type": "bar",
+          "x": 192,
+          "y": 264,
+          "w": 232,
+          "h": 12,
+          "bind": {
+            "value": "$net_rx_pct"
+          }
+        },
+        {
+          "type": "label",
+          "x": 28,
+          "y": 284,
+          "w": 20,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "TX"
+          }
+        },
+        {
+          "type": "label",
+          "x": 52,
+          "y": 284,
+          "w": 84,
+          "h": 12,
+          "style": {
+            "text_color": "#f6fffe"
+          },
+          "bind": {
+            "text": "$net_tx"
+          }
+        },
+        {
+          "type": "label",
+          "x": 150,
+          "y": 284,
+          "w": 24,
+          "h": 12,
+          "style": {
+            "text_color": "#f6fffe",
+            "text_align": "right"
+          },
+          "bind": {
+            "text": "$net_tx_pct"
+          }
+        },
+        {
+          "type": "label",
+          "x": 176,
+          "y": 284,
+          "w": 10,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "%"
+          }
+        },
+        {
+          "type": "bar",
+          "x": 192,
+          "y": 286,
+          "w": 232,
+          "h": 12,
+          "bind": {
+            "value": "$net_tx_pct"
+          },
+          "style": {
+            "indicator": {
+              "fill_color": "#7cc7ff"
+            }
+          }
+        }
+      ]
+    },
+    {
+      "id": "graphs",
+      "widgets": [
+        {
+          "type": "container",
+          "layout": "absolute",
+          "x": 0,
+          "y": 0,
+          "w": 480,
+          "h": 320,
+          "bg_image": "wallpaper_grid",
+          "style": {
+            "bg_color": "#071019",
+            "bg_opa": 216
+          },
+          "children": []
+        },
+        {
+          "type": "container",
+          "layout": "absolute",
+          "x": 12,
+          "y": 10,
+          "w": 456,
+          "h": 42,
+          "style": {
+            "bg_color": "#0b1b26",
+            "bg_opa": 208,
+            "border_width": 1,
+            "border_color": "#285f71",
+            "radius": 14
+          },
+          "children": []
+        },
+        {
+          "type": "label",
+          "x": 24,
+          "y": 20,
+          "w": 48,
+          "h": 16,
+          "style": {
+            "font": "unscii_16",
+            "text_color": "#5eead4"
+          },
+          "bind": {
+            "text": "SYS"
+          }
+        },
+        {
+          "type": "label",
+          "x": 78,
+          "y": 20,
+          "w": 170,
+          "h": 14,
+          "style": {
+            "text_color": "#f4fffe"
+          },
+          "bind": {
+            "text": "$host_name"
+          }
+        },
+        {
+          "type": "label",
+          "x": 78,
+          "y": 34,
+          "w": 104,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "$kernel_short"
+          }
+        },
+        {
+          "type": "label",
+          "x": 188,
+          "y": 34,
+          "w": 84,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "$uptime_fmt"
+          }
+        },
+        {
+          "type": "button",
+          "x": 284,
+          "y": 18,
+          "w": 56,
+          "h": 22,
+          "style": {
+            "text_align": "center"
+          },
+          "bind": {
+            "label": "MAIN"
+          },
+          "on_tap": "screen.main"
+        },
+        {
+          "type": "button",
+          "x": 344,
+          "y": 18,
+          "w": 56,
+          "h": 22,
+          "style": {
+            "text_align": "center",
+            "bg_color": "#5eead4",
+            "text_color": "#071019",
+            "border_color": "#5eead4",
+            "outline_color": "#c4fff7",
+            "outline_width": 1
+          },
+          "bind": {
+            "label": "GRAPHS"
+          },
+          "on_tap": "screen.graphs"
+        },
+        {
+          "type": "button",
+          "x": 404,
+          "y": 18,
+          "w": 56,
+          "h": 22,
+          "style": {
+            "text_align": "center"
+          },
+          "bind": {
+            "label": "INFO"
+          },
+          "on_tap": "screen.info"
+        },
+        {
+          "type": "container",
+          "layout": "absolute",
+          "x": 12,
+          "y": 58,
+          "w": 220,
+          "h": 86,
+          "style": {
+            "bg_color": "#0d1d28",
+            "bg_opa": 224,
+            "border_width": 1,
+            "border_color": "#285f71",
+            "radius": 16
+          },
+          "children": []
+        },
+        {
+          "type": "label",
+          "x": 24,
+          "y": 68,
+          "w": 64,
+          "h": 16,
+          "style": {
+            "font": "unscii_16",
+            "text_color": "#5eead4"
+          },
+          "bind": {
+            "text": "CPU"
+          }
+        },
+        {
+          "type": "graph",
+          "x": 24,
+          "y": 88,
+          "w": 196,
+          "h": 44,
+          "graph_style": "line",
+          "line_width": 2,
+          "bar_width": 3,
+          "bar_gap": 1,
+          "grid_lines": 2,
+          "y_min": 0,
+          "y_max": 100,
+          "point_count": 40,
+          "color": "#5eead4",
+          "bind": {
+            "value": "$cpu_usage"
+          }
+        },
+        {
+          "type": "container",
+          "layout": "absolute",
+          "x": 248,
+          "y": 58,
+          "w": 220,
+          "h": 86,
+          "style": {
+            "bg_color": "#0d1d28",
+            "bg_opa": 224,
+            "border_width": 1,
+            "border_color": "#285f71",
+            "radius": 16
+          },
+          "children": []
+        },
+        {
+          "type": "label",
+          "x": 260,
+          "y": 68,
+          "w": 64,
+          "h": 16,
+          "style": {
+            "font": "unscii_16",
+            "text_color": "#5eead4"
+          },
+          "bind": {
+            "text": "GPU"
+          }
+        },
+        {
+          "type": "graph",
+          "x": 260,
+          "y": 88,
+          "w": 196,
+          "h": 44,
+          "graph_style": "area",
+          "line_width": 2,
+          "bar_width": 3,
+          "bar_gap": 1,
+          "grid_lines": 2,
+          "y_min": 0,
+          "y_max": 100,
+          "point_count": 40,
+          "color": "#7cc7ff",
+          "bind": {
+            "value": "$gpu_usage"
+          }
+        },
+        {
+          "type": "container",
+          "layout": "absolute",
+          "x": 12,
+          "y": 154,
+          "w": 220,
+          "h": 86,
+          "style": {
+            "bg_color": "#0d1d28",
+            "bg_opa": 224,
+            "border_width": 1,
+            "border_color": "#285f71",
+            "radius": 16
+          },
+          "children": []
+        },
+        {
+          "type": "label",
+          "x": 24,
+          "y": 164,
+          "w": 74,
+          "h": 16,
+          "style": {
+            "font": "unscii_16",
+            "text_color": "#5eead4"
+          },
+          "bind": {
+            "text": "RX %"
+          }
+        },
+        {
+          "type": "graph",
+          "x": 24,
+          "y": 184,
+          "w": 196,
+          "h": 44,
+          "graph_style": "bars",
+          "line_width": 2,
+          "bar_width": 3,
+          "bar_gap": 1,
+          "grid_lines": 2,
+          "y_min": 0,
+          "y_max": 100,
+          "point_count": 40,
+          "color": "#5eead4",
+          "bind": {
+            "value": "$net_rx_pct"
+          }
+        },
+        {
+          "type": "container",
+          "layout": "absolute",
+          "x": 248,
+          "y": 154,
+          "w": 220,
+          "h": 86,
+          "style": {
+            "bg_color": "#0d1d28",
+            "bg_opa": 224,
+            "border_width": 1,
+            "border_color": "#285f71",
+            "radius": 16
+          },
+          "children": []
+        },
+        {
+          "type": "label",
+          "x": 260,
+          "y": 164,
+          "w": 74,
+          "h": 16,
+          "style": {
+            "font": "unscii_16",
+            "text_color": "#5eead4"
+          },
+          "bind": {
+            "text": "TX %"
+          }
+        },
+        {
+          "type": "graph",
+          "x": 260,
+          "y": 184,
+          "w": 196,
+          "h": 44,
+          "graph_style": "bars",
+          "line_width": 2,
+          "bar_width": 3,
+          "bar_gap": 1,
+          "grid_lines": 2,
+          "y_min": 0,
+          "y_max": 100,
+          "point_count": 40,
+          "color": "#7cc7ff",
+          "bind": {
+            "value": "$net_tx_pct"
+          }
+        },
+        {
+          "type": "container",
+          "layout": "absolute",
+          "x": 12,
+          "y": 250,
+          "w": 456,
+          "h": 58,
+          "style": {
+            "bg_color": "#0d1d28",
+            "bg_opa": 224,
+            "border_width": 1,
+            "border_color": "#285f71",
+            "radius": 16
+          },
+          "children": []
+        },
+        {
+          "type": "label",
+          "x": 24,
+          "y": 260,
+          "w": 120,
+          "h": 16,
+          "style": {
+            "font": "unscii_16",
+            "text_color": "#5eead4"
+          },
+          "bind": {
+            "text": "LIVE"
+          }
+        },
+        {
+          "type": "label",
+          "x": 24,
+          "y": 282,
+          "w": 24,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "CPU"
+          }
+        },
+        {
+          "type": "label",
+          "x": 50,
+          "y": 282,
+          "w": 24,
+          "h": 12,
+          "style": {
+            "text_color": "#f6fffe",
+            "text_align": "right"
+          },
+          "bind": {
+            "text": "$cpu_usage"
+          }
+        },
+        {
+          "type": "label",
+          "x": 76,
+          "y": 282,
+          "w": 10,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "%"
+          }
+        },
+        {
+          "type": "label",
+          "x": 116,
+          "y": 282,
+          "w": 24,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "GPU"
+          }
+        },
+        {
+          "type": "label",
+          "x": 142,
+          "y": 282,
+          "w": 24,
+          "h": 12,
+          "style": {
+            "text_color": "#f6fffe",
+            "text_align": "right"
+          },
+          "bind": {
+            "text": "$gpu_usage"
+          }
+        },
+        {
+          "type": "label",
+          "x": 168,
+          "y": 282,
+          "w": 10,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "%"
+          }
+        },
+        {
+          "type": "label",
+          "x": 226,
+          "y": 282,
+          "w": 20,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "RX"
+          }
+        },
+        {
+          "type": "label",
+          "x": 250,
+          "y": 282,
+          "w": 84,
+          "h": 12,
+          "style": {
+            "text_color": "#f6fffe"
+          },
+          "bind": {
+            "text": "$net_rx"
+          }
+        },
+        {
+          "type": "label",
+          "x": 340,
+          "y": 282,
+          "w": 20,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "TX"
+          }
+        },
+        {
+          "type": "label",
+          "x": 364,
+          "y": 282,
+          "w": 84,
+          "h": 12,
+          "style": {
+            "text_color": "#f6fffe"
+          },
+          "bind": {
+            "text": "$net_tx"
+          }
+        }
+      ]
+    },
+    {
+      "id": "info",
+      "widgets": [
+        {
+          "type": "container",
+          "layout": "absolute",
+          "x": 0,
+          "y": 0,
+          "w": 480,
+          "h": 320,
+          "bg_image": "wallpaper_grid",
+          "style": {
+            "bg_color": "#071019",
+            "bg_opa": 216
+          },
+          "children": []
+        },
+        {
+          "type": "container",
+          "layout": "absolute",
+          "x": 12,
+          "y": 10,
+          "w": 456,
+          "h": 42,
+          "style": {
+            "bg_color": "#0b1b26",
+            "bg_opa": 208,
+            "border_width": 1,
+            "border_color": "#285f71",
+            "radius": 14
+          },
+          "children": []
+        },
+        {
+          "type": "label",
+          "x": 24,
+          "y": 20,
+          "w": 48,
+          "h": 16,
+          "style": {
+            "font": "unscii_16",
+            "text_color": "#5eead4"
+          },
+          "bind": {
+            "text": "SYS"
+          }
+        },
+        {
+          "type": "label",
+          "x": 78,
+          "y": 18,
+          "w": 170,
+          "h": 14,
+          "style": {
+            "text_color": "#f4fffe"
+          },
+          "bind": {
+            "text": "$host_name"
+          }
+        },
+        {
+          "type": "label",
+          "x": 78,
+          "y": 34,
+          "w": 104,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "$kernel_short"
+          }
+        },
+        {
+          "type": "label",
+          "x": 188,
+          "y": 34,
+          "w": 84,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "$uptime_fmt"
+          }
+        },
+        {
+          "type": "button",
+          "x": 284,
+          "y": 18,
+          "w": 56,
+          "h": 22,
+          "style": {
+            "text_align": "center"
+          },
+          "bind": {
+            "label": "MAIN"
+          },
+          "on_tap": "screen.main"
+        },
+        {
+          "type": "button",
+          "x": 344,
+          "y": 18,
+          "w": 56,
+          "h": 22,
+          "style": {
+            "text_align": "center"
+          },
+          "bind": {
+            "label": "GRAPHS"
+          },
+          "on_tap": "screen.graphs"
+        },
+        {
+          "type": "button",
+          "x": 404,
+          "y": 18,
+          "w": 56,
+          "h": 22,
+          "style": {
+            "text_align": "center",
+            "bg_color": "#5eead4",
+            "text_color": "#071019",
+            "border_color": "#5eead4",
+            "outline_color": "#c4fff7",
+            "outline_width": 1
+          },
+          "bind": {
+            "label": "INFO"
+          },
+          "on_tap": "screen.info"
+        },
+
+        {
+          "type": "container",
+          "layout": "absolute",
+          "x": 12,
+          "y": 60,
+          "w": 220,
+          "h": 104,
+          "style": {
+            "bg_color": "#0d1d28",
+            "bg_opa": 224,
+            "border_width": 1,
+            "border_color": "#285f71",
+            "radius": 16
+          },
+          "children": []
+        },
+        {
+          "type": "label",
+          "x": 28,
+          "y": 72,
+          "w": 64,
+          "h": 16,
+          "style": {
+            "font": "unscii_16",
+            "text_color": "#5eead4"
+          },
+          "bind": {
+            "text": "HOST"
+          }
+        },
+        {
+          "type": "image",
+          "x": 28,
+          "y": 94,
+          "w": 48,
+          "h": 48,
+          "src": "logo_badge"
+        },
+        {
+          "type": "label",
+          "x": 92,
+          "y": 96,
+          "w": 116,
+          "h": 12,
+          "style": {
+            "text_color": "#f6fffe"
+          },
+          "bind": {
+            "text": "$host_name"
+          }
+        },
+        {
+          "type": "label",
+          "x": 92,
+          "y": 114,
+          "w": 116,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "$kernel_short"
+          }
+        },
+        {
+          "type": "label",
+          "x": 92,
+          "y": 130,
+          "w": 116,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "$uptime_fmt"
+          }
+        },
+        {
+          "type": "label",
+          "x": 92,
+          "y": 148,
+          "w": 14,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "IP"
+          }
+        },
+        {
+          "type": "label",
+          "x": 110,
+          "y": 148,
+          "w": 98,
+          "h": 12,
+          "style": {
+            "text_color": "#f6fffe"
+          },
+          "bind": {
+            "text": "$net_ip"
+          }
+        },
+
+        {
+          "type": "container",
+          "layout": "absolute",
+          "x": 248,
+          "y": 60,
+          "w": 220,
+          "h": 104,
+          "style": {
+            "bg_color": "#0d1d28",
+            "bg_opa": 224,
+            "border_width": 1,
+            "border_color": "#285f71",
+            "radius": 16
+          },
+          "children": []
+        },
+        {
+          "type": "label",
+          "x": 264,
+          "y": 72,
+          "w": 120,
+          "h": 16,
+          "style": {
+            "font": "unscii_16",
+            "text_color": "#5eead4"
+          },
+          "bind": {
+            "text": "NETWORK"
+          }
+        },
+        {
+          "type": "label",
+          "x": 264,
+          "y": 98,
+          "w": 42,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "IFACE"
+          }
+        },
+        {
+          "type": "label",
+          "x": 312,
+          "y": 98,
+          "w": 64,
+          "h": 12,
+          "style": {
+            "text_color": "#f6fffe"
+          },
+          "bind": {
+            "text": "$net_iface"
+          }
+        },
+        {
+          "type": "label",
+          "x": 384,
+          "y": 98,
+          "w": 30,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "LINK"
+          }
+        },
+        {
+          "type": "label",
+          "x": 420,
+          "y": 98,
+          "w": 24,
+          "h": 12,
+          "style": {
+            "text_color": "#f6fffe"
+          },
+          "bind": {
+            "text": "$net_link"
+          }
+        },
+        {
+          "type": "label",
+          "x": 264,
+          "y": 114,
+          "w": 40,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "STATE"
+          }
+        },
+        {
+          "type": "label",
+          "x": 312,
+          "y": 114,
+          "w": 50,
+          "h": 12,
+          "style": {
+            "text_color": "#f6fffe"
+          },
+          "bind": {
+            "text": "$net_state"
+          }
+        },
+        {
+          "type": "label",
+          "x": 264,
+          "y": 130,
+          "w": 58,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "GATEWAY"
+          }
+        },
+        {
+          "type": "label",
+          "x": 328,
+          "y": 130,
+          "w": 116,
+          "h": 12,
+          "style": {
+            "text_color": "#f6fffe"
+          },
+          "bind": {
+            "text": "$net_gateway"
+          }
+        },
+        {
+          "type": "label",
+          "x": 264,
+          "y": 145,
+          "w": 20,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "RX"
+          }
+        },
+        {
+          "type": "label",
+          "x": 288,
+          "y": 145,
+          "w": 56,
+          "h": 12,
+          "style": {
+            "text_color": "#f6fffe"
+          },
+          "bind": {
+            "text": "$net_rx"
+          }
+        },
+        {
+          "type": "label",
+          "x": 360,
+          "y": 145,
+          "w": 20,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "TX"
+          }
+        },
+        {
+          "type": "label",
+          "x": 384,
+          "y": 145,
+          "w": 60,
+          "h": 12,
+          "style": {
+            "text_color": "#f6fffe"
+          },
+          "bind": {
+            "text": "$net_tx"
+          }
+        },
+
+        {
+          "type": "container",
+          "layout": "absolute",
+          "x": 12,
+          "y": 176,
+          "w": 456,
+          "h": 132,
+          "style": {
+            "bg_color": "#0d1d28",
+            "bg_opa": 224,
+            "border_width": 1,
+            "border_color": "#285f71",
+            "radius": 16
+          },
+          "children": []
+        },
+        {
+          "type": "label",
+          "x": 28,
+          "y": 188,
+          "w": 110,
+          "h": 16,
+          "style": {
+            "font": "unscii_16",
+            "text_color": "#5eead4"
+          },
+          "bind": {
+            "text": "SENSORS"
+          }
+        },
+
+        {
+          "type": "container",
+          "layout": "absolute",
+          "x": 24,
+          "y": 212,
+          "w": 204,
+          "h": 82,
+          "style": {
+            "bg_color": "#0b1b26",
+            "bg_opa": 96,
+            "border_width": 1,
+            "border_color": "#1f4958",
+            "radius": 12
+          },
+          "children": []
+        },
+        {
+          "type": "image",
+          "x": 36,
+          "y": 226,
+          "w": 48,
+          "h": 48,
+          "src": "chip_cpu"
+        },
+
+        {
+          "type": "label",
+          "x": 120,
+          "y": 220,
+          "w": 42,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc",
+            "text_align": "left"
+          },
+          "bind": {
+            "text": "CPU"
+          }
+        },
+        {
+          "type": "label",
+          "x": 140,
+          "y": 220,
+          "w": 46,
+          "h": 12,
+          "style": {
+            "text_color": "#f6fffe",
+            "text_align": "right"
+          },
+          "bind": {
+            "text": "$cpu_usage"
+          }
+        },
+        {
+          "type": "label",
+          "x": 200,
+          "y": 220,
+          "w": 10,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "%"
+          }
+        },
+
+        {
+          "type": "label",
+          "x": 120,
+          "y": 242,
+          "w": 42,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc",
+            "text_align": "left"
+          },
+          "bind": {
+            "text": "TEMP"
+          }
+        },
+        {
+          "type": "label",
+          "x": 140,
+          "y": 242,
+          "w": 46,
+          "h": 12,
+          "style": {
+            "text_color": "#f6fffe",
+            "text_align": "right"
+          },
+          "bind": {
+            "text": "$cpu_temp_c"
+          }
+        },
+        {
+          "type": "label",
+          "x": 200,
+          "y": 242,
+          "w": 10,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "C"
+          }
+        },
+
+        {
+          "type": "label",
+          "x": 120,
+          "y": 264,
+          "w": 42,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc",
+            "text_align": "left"
+          },
+          "bind": {
+            "text": "RAM"
+          }
+        },
+        {
+          "type": "label",
+          "x": 140,
+          "y": 264,
+          "w": 46,
+          "h": 12,
+          "style": {
+            "text_color": "#f6fffe",
+            "text_align": "right"
+          },
+          "bind": {
+            "text": "$ram_percent"
+          }
+        },
+        {
+          "type": "label",
+          "x": 200,
+          "y": 264,
+          "w": 10,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "%"
+          }
+        },
+
+        {
+          "type": "container",
+          "layout": "absolute",
+          "x": 252,
+          "y": 212,
+          "w": 204,
+          "h": 82,
+          "style": {
+            "bg_color": "#0b1b26",
+            "bg_opa": 96,
+            "border_width": 1,
+            "border_color": "#1f4958",
+            "radius": 12
+          },
+          "children": []
+        },
+        {
+          "type": "image",
+          "x": 264,
+          "y": 226,
+          "w": 48,
+          "h": 48,
+          "src": "chip_gpu"
+        },
+
+        {
+          "type": "label",
+          "x": 320,
+          "y": 220,
+          "w": 42,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc",
+            "text_align": "right"
+          },
+          "bind": {
+            "text": "GPU"
+          }
+        },
+        {
+          "type": "label",
+          "x": 380,
+          "y": 220,
+          "w": 46,
+          "h": 12,
+          "style": {
+            "text_color": "#f6fffe",
+            "text_align": "right"
+          },
+          "bind": {
+            "text": "$gpu_usage"
+          }
+        },
+        {
+          "type": "label",
+          "x": 430,
+          "y": 220,
+          "w": 10,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "%"
+          }
+        },
+
+        {
+          "type": "label",
+          "x": 320,
+          "y": 242,
+          "w": 42,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc",
+            "text_align": "right"
+          },
+          "bind": {
+            "text": "TEMP"
+          }
+        },
+        {
+          "type": "label",
+          "x": 380,
+          "y": 242,
+          "w": 46,
+          "h": 12,
+          "style": {
+            "text_color": "#f6fffe",
+            "text_align": "right"
+          },
+          "bind": {
+            "text": "$gpu_temp_c"
+          }
+        },
+        {
+          "type": "label",
+          "x": 430,
+          "y": 242,
+          "w": 10,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc"
+          },
+          "bind": {
+            "text": "C"
+          }
+        },
+
+        {
+          "type": "label",
+          "x": 320,
+          "y": 264,
+          "w": 42,
+          "h": 12,
+          "style": {
+            "text_color": "#9fe3dc",
+            "text_align": "right"
+          },
+          "bind": {
+            "text": "VRAM"
+          }
+        },
+        {
+          "type": "label",
+          "x": 380,
+          "y": 264,
+          "w": 58,
+          "h": 12,
+          "style": {
+            "text_color": "#f6fffe",
+            "text_align": "right"
+          },
+          "bind": {
+            "text": "$gpu_mem_used"
+          }
+        }
+      ]
+    }
+  ]
+}

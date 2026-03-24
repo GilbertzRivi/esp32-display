@@ -35,6 +35,12 @@ static void lvgl_flush_cb(lv_disp_drv_t *drv, const lv_area_t *area, lv_color_t 
 /* LVGL v8 po wywolaniu flush_cb czeka na draw_buf->flushing == 0.
    Bez wait_cb robi busy-loop ktory nie oddaje CPU → IDLE nie dziala → WDT.
    wait_cb z vTaskDelay(1) oddaje CPU na 1 tick i pozwala ISR/DMA skonczyc. */
+static void lvgl_rounder_cb(lv_disp_drv_t *drv, lv_area_t *area)
+{
+    area->x2 = LV_MIN(area->x2 + 1, (lv_coord_t)(drv->hor_res - 1));
+    area->y2 = LV_MIN(area->y2 + 1, (lv_coord_t)(drv->ver_res - 1));
+}
+
 static void lvgl_wait_cb(lv_disp_drv_t *drv)
 {
     (void)drv;
@@ -60,6 +66,7 @@ void lvgl_port_init(esp_lcd_panel_handle_t panel)
     disp_drv.flush_cb  = lvgl_flush_cb;
     disp_drv.wait_cb   = lvgl_wait_cb;
     disp_drv.draw_buf  = &draw_buf;
+    disp_drv.rounder_cb = lvgl_rounder_cb;
     disp_drv.user_data = panel;
     lv_disp_set_default(lv_disp_drv_register(&disp_drv));
 
